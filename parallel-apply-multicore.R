@@ -11,18 +11,13 @@
 
 library(parallel)
 
-taskFun <- function(){
-	mn <- mean(rnorm(10000000))
-	return(mn)
-}
-
 nCores <- as.numeric(Sys.getenv('SLURM_CPUS_ON_NODE'))
 cl <- makeCluster(nCores) 
 
 nTasks <- 60
 input <- 1:nTasks
 
-taskFun <- function(){
+taskFun <- function(i){
         mn <- mean(rnorm(1000000))
         return(mn)
 }

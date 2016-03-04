@@ -290,7 +290,7 @@ Here's the code to use foreach on a single node with the standard multicore (*do
 
 And here's code for using the parallel apply functionality provided in the *parallel* package.
 
-```{r, parallel-apply-multicore.R, eval=FALSE}
+```{r, parallel-apply-multicore, eval=FALSE}
 ```
 
 ## 5.3) foreach and parallel apply on multiple nodes

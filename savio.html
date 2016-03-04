@@ -461,6 +461,8 @@ Rscript -e &quot;install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.
 
 <h2>4.7) Getting help with Savio</h2>
 
+<p>Berkeley Research Computing provides consulting for campus researchers and can help answer questions in a variety of areas.</p>
+
 <ul>
 <li>For technical issues and questions about using Savio: email <a href="mailto:brc-hpc-help@lists.berkeley.edu">brc-hpc-help@lists.berkeley.edu</a>.</li>
 <li>For questions about computing resources in general, including cloud computing: email <a href="mailto:brc@berkeley.edu">brc@berkeley.edu</a>.</li>
@@ -485,9 +487,10 @@ Rscript -e &quot;install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.
 # or use a fixed number: 
 # export OMP_NUM_THREADS=8
 R CMD BATCH --no-save file.R file.Rout
+# then presumably you&#39;ll use linear algebra functionality in file.R
 </code></pre>
 
-<p>This should work on the Biostat cluster, on which R is linked to the fast threaded BLAS called openBLAS (I believe).  You&#39;ll probably need to use the SGE environment variable $NSLOTS in place of $SLURM_CPUS_ON_NODE (presuming you are using a single node and want all of the requested cores used for threading).</p>
+<p>This should work on the Biostat cluster, on which R is linked to the fast threaded BLAS called openBLAS (I believe).  You&#39;ll probably need to use the SGE environment variable <em>$NSLOTS</em> in place of <em>$SLURM_CPUS_ON_NODE</em> (presuming you are using a single node and want all of the requested cores used for threading).</p>
 
 <h2>5.2) foreach and parallel apply on one node</h2>
 
@@ -497,16 +500,18 @@ R CMD BATCH --no-save file.R file.Rout
 # sbatch -A ac_scsguest -p savio  -N 1 -t 30:0 job.sh
 #
 # job.sh:
+# module load r
 # R CMD BATCH --no-save foreach-multicore.R foreach-multicore.Rout
 
-install.packages(&#39;doParallel&#39;, repos = &#39;http://cran.cnr.berkeley.edu&#39;)
+# make sure doParallel is installed
+# install.packages(&#39;doParallel&#39;, repos = &#39;http://cran.cnr.berkeley.edu&#39;)
 
 library(doParallel)
 taskFun &lt;- function(){
     mn &lt;- mean(rnorm(10000000))
     return(mn)
 }
-nCores &lt;- Sys.getenv(&#39;SLURM_CPUS_ON_NODE&#39;)
+nCores &lt;- as.numeric(Sys.getenv(&#39;SLURM_CPUS_ON_NODE&#39;))
 registerDoParallel(nCores) 
 
 nTasks &lt;- 60
@@ -520,6 +525,38 @@ print(system.time(out &lt;- foreach(i = 1:nTasks) %dopar% {
 
 <p>And here&#39;s code for using the parallel apply functionality provided in the <em>parallel</em> package.</p>
 
+<pre><code class="r"># example invocation
+# sbatch -A ac_scsguest -p savio  -N 1 -t 30:0 job.sh
+#
+# job.sh:
+# module load r
+# R CMD BATCH --no-save parallel-apply-multicore.R parallel-apply-multicore.Rout
+
+
+library(parallel)
+
+taskFun &lt;- function(){
+    mn &lt;- mean(rnorm(10000000))
+    return(mn)
+}
+
+nCores &lt;- as.numeric(Sys.getenv(&#39;SLURM_CPUS_ON_NODE&#39;))
+cl &lt;- makeCluster(nCores) 
+
+nTasks &lt;- 60
+input &lt;- 1:nTasks
+
+taskFun &lt;- function(){
+        mn &lt;- mean(rnorm(1000000))
+        return(mn)
+}
+
+# if the processes need objects (x and y, here) from the master&#39;s workspace:
+# clusterExport(cl, c(&#39;x&#39;, &#39;y&#39;)) 
+
+res &lt;- parSapply(cl, input, taskFun)
+</code></pre>
+
 <h2>5.3) foreach and parallel apply on multiple nodes</h2>
 
 <p>When trying to run parallel R code across multiple nodes, there needs to be some back-end work done to distribute the work across the nodes. There are a variety of tools for this. </p>
@@ -532,6 +569,7 @@ print(system.time(out &lt;- foreach(i = 1:nTasks) %dopar% {
 # sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
 #
 # job.sh:
+# module load r
 # R CMD BATCH --no-save parallel-apply-distributed.R parallel-apply-distributed.Rout
 
 library(parallel)
@@ -563,6 +601,7 @@ res &lt;- parSapply(cl, input, taskFun)
 # sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
 #
 # job.sh:
+# module load r
 # R CMD BATCH --no-save foreach-doSNOW.R foreach-doSNOW.Rout
 
 install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.cnr.berkeley.edu&#39;)

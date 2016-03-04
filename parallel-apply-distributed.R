@@ -17,7 +17,7 @@ cl = makeCluster(machines)
 nTasks <- 60
 input <- 1:nTasks
 
-taskFun <- function(){
+taskFun <- function(i){
         mn <- mean(rnorm(1000000))
         return(mn)
 }
