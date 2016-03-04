@@ -17,9 +17,9 @@ read_chunk('pbd-apply.R')
 read_chunk('pbd-linalg.R')
 ```
 
-# 0) This Workshop
+# 0) This workshop
 
-This tutorial covers how to use Savio, basic strategies for using parallel processing in R, primarily on Savio, and campus resources for storing and transferring data.
+This workshop covers how to use Savio, basic strategies for using parallel processing in R, primarily on Savio, and campus resources for storing and transferring data.
 
 Savio is the (fairly) new campus high-performance computing cluster, run by [Berkeley Research Computing](http://research-it.berkeley.edu/programs/berkeley-research-computing).
 
@@ -61,7 +61,7 @@ The shared memory parallelism approaches that we'll cover are:
  - multi-core computations using multiple processes via foreach or parallel apply/sapply/lapply
  
 
-### Threading linear algebra
+### Threaded linear algebra
 
 Threads are multiple paths of execution within a single process. Using
 *top* to monitor a job that is executing threaded code, you'll
@@ -107,7 +107,7 @@ Other distributed memory capabilities available for R that we won't cover includ
 
  - Amazon EC2 and other cloud providers 
    - ability to start virtual machines and virtual clusters
-   - See [my talk last year](https://github.com/berkeley-scf/parallelR-biostat-2015), in particular the [PDF overview](https://rawgit.com/berkeley-scf/parallelR-biostat-2015/master/parallel.pdf)
+   - See [my presentation for Biostat last year](https://github.com/berkeley-scf/parallelR-biostat-2015), in particular the [PDF overview](https://rawgit.com/berkeley-scf/parallelR-biostat-2015/master/parallel.pdf)
 
 # 3) Basic suggestions for parallelizing your code
 
@@ -117,7 +117,7 @@ the results collected. When the tasks need to interact, things get
 much harder. Much of the material here is focused on embarrassingly
 parallel computation.
 
-[Section 4 of this tutorial](https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html) has some basic principles/suggestions for basic principles/suggestions for how to parallelize your computation.
+[Section 4 of this tutorial](https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html) has some basic principles/suggestions for how to parallelize your computation.
 
 I'm happy to help discuss specific circumstances, so just email consult@stat.berkeley.edu.
 The new Berkeley Research Computing (BRC) initiative is also providing
@@ -155,7 +155,7 @@ Here I'll use an account I have access to `ac_scsguest`, but when you do this, u
 # 4.3) Submitting jobs
 
 To run an interactive job for up to 30 minutes on one node:
-```{r, sacct, eval=FALSE, engine='bash'}
+```{r, srun, eval=FALSE, engine='bash'}
 srun -A ac_scsguest -p savio  -N 1 -t 30:0 --pty bash
 ```
 
@@ -232,13 +232,25 @@ module unload intel # not necessary for doSNOW specifically
 Rscript -e "install.packages(c('doSNOW'), repos = 'http://cran.cnr.berkeley.edu')"
 ```
 
-However, not infrequently, installation of an R package (or its dependencies) requires a system package to be installed. Some of these might be available via `module load`, while others will not. For more guidance, contact [brc-hpc-help@lists.berkeley.edu] or feel free to contact me ([consult@stat.berkeley.edu]) directly.
+However, not infrequently, installation of an R package (or its dependencies) requires a system package to be installed. Some of these might be available via `module load`, while others will not. For more guidance, contact brc-hpc-help@lists.berkeley.edu or feel free to contact me (consult@stat.berkeley.edu) directly.
 
-At the moment R is an older version (3.1.1) and unlike on the Biostat or Statistics clusters, R does not use a fast BLAS, which means your linear algebra may be an order of magnitude or more slower than it could be. If this is important to you, email Burke or [consult@stat.berkeley.edu] for guidance on installing your own version of R that uses the fast MKL BLAS that is available on Savio.
+At the moment R is an older version (3.1.1) and unlike on the Biostat or Statistics clusters, R does not use a fast BLAS, which means your linear algebra may be an order of magnitude or more slower than it could be. If this is important to you, email Burke or consult@stat.berkeley.edu for guidance on installing your own version of R that uses the fast MKL BLAS that is available on Savio.
 
-# 5) Parallel R on Savio
+## 4.6) Getting help with Savio
+
+ - For technical issues and questions about using Savio: email brc-hpc-help@lists.berkeley.edu.
+ - For questions about computing resources in general, including cloud computing: email brc@berkeley.edu.
+ - For questions about data management (including HIPAA-protected data): email researchdata@berkeley.edu.
+
+I can also help with some of these topics (less so with data management): email consult@stat.berkeley.edu.
+
+# 5) Parallel R 
 
 One key thing to note here is that for parallelizing independent iterations/replications of a computation (Sections 5.2 and 5.3 here) there are a zillion ways to do this in R, with a variety of functions you can use (foreach, parLapply, mclapply) and a variety of parallel functionality behind the scenes (MPI, SNOW, sockets, pbdR). They'll all likely have similar computation time, so whatever you can make work is likely to be fine. 
+
+# 5.1) Savio vs. the Biostat cluster 
+
+We'll focus on doing this on Savio, but the R syntax should work on the Biostat cluster and the way you start the R job should be very similar. The submission of the job to the cluster differs based on the different scheduler software in use: the Biostat cluster uses SGE and Savio uses SLURM. So on the biostat cluster you'd submit jobs with the SGE submission syntax (*qsub*, *qrsh*). And when specifying how many cores your job has access to, you will probably need to use different environment variables, most likely the *$NSLOTS* variable.  Also on the biostat cluster, you're limited to at most 72 cores for a job.
 
 ## 5.1) Threaded linear algebra
 
@@ -352,11 +364,6 @@ the value of $pi$), using MPI functionality.
 ```{r, pbd-mpi, eval=FALSE}
 ```
 
-# 6) Parallel R on the Biostat cluster
-
-The same R syntax should work on the Biostat cluster, except that you need to use the SGE submission syntax (*qsub*, *qrsh*). And when specifying how many cores your job has access to, you will probably need to use different environment variables, most likely the *$NSLOTS* variable.
-
-Also if you run code via mpirun (up to 72 cores), you might need to add some flags after `mpirun`; check with Burke for details.
 
 # 6) Storing and transferring large datasets
 
@@ -388,7 +395,7 @@ Globus also provides a [command line interface](https://docs.globus.org/cli/usin
 
 Box provides **unlimited**, free, secured, and encrypted content storage of files with a maximum file size of 15 Gb to Berkeley affiliates. So it's a good option for backup and long-term storage. 
 
-You can move files between Box and your laptop using the Box Sync app. 
+You can move files between Box and your laptop using the Box Sync app. And you can interact with Box via a web browser at [box.berkeley.edu].
 
 The best way to move files between Box and Savio is [via lftp as discussed here](http://research-it.berkeley.edu/services/high-performance-computing/transferring-data-between-savio-and-your-uc-berkeley-box-account). 
 
@@ -425,7 +432,7 @@ Be careful, because it's fairly easy to wipe out files or directories on Box.
 
 Finally you can set up *special purpose accounts* (Berkeley SPA) so files are owned at a project level rather than by individuals.
 
-BRC is working on making Globus available for transfer to/from Box, but it's not available yet.
+BRC is working (long-term) on making Globus available for transfer to/from Box, but it's not available yet.
 
 ## 6.4) Transfer to/from bDrive (Google Drive)
 
@@ -433,6 +440,6 @@ bDrive provides **unlimited**, free, secured, and encrypted content storage of f
 
 You can move files to and from your laptop using the Google Drive app. 
 
-There are also some third-party tools for copying files to/from Google Drive, though I've found them to be a bit klunky. This is why I'd recommend using Box for workflows at this point. However, BRC is also working on making Globus available for transfer to/from bDrive, though it's not available yet.
+There are also some third-party tools for copying files to/from Google Drive, though I've found them to be a bit klunky. This is why I'd recommend using Box for workflows at this point. However, BRC is also working (short-term) on making Globus available for transfer to/from bDrive, though it's not available yet.
 
 

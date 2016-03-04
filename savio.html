@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Workshop on Savio, Parallel R, and Data Storage, March 2016</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: #990073
+   }
+
+   pre .number {
+     color: #099;
+   }
+
+   pre .comment {
+     color: #998;
+     font-style: italic
+   }
+
+   pre .keyword {
+     color: #900;
+     font-weight: bold
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: #d14;
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h1>Workshop on Savio, Parallel R, and Data Storage, March 2016</h1>
+
+<p>Chris Paciorek, Department of Statistics and 
+Berkeley Research Computing, UC Berkeley</p>
+
+<h1>0) This workshop</h1>
+
+<p>This workshop covers how to use Savio, basic strategies for using parallel processing in R, primarily on Savio, and campus resources for storing and transferring data.</p>
+
+<p>Savio is the (fairly) new campus high-performance computing cluster, run by <a href="http://research-it.berkeley.edu/programs/berkeley-research-computing">Berkeley Research Computing</a>.</p>
+
+<p>This tutorial assumes you have a working knowledge of R and the basics of the UNIX/Linux command line.</p>
+
+<p>Materials for this tutorial, including the R markdown file and associated code files that were used to create this document are available on Github at <a href="https://github.com/berkeley-scf/savio-biostat-2016">https://github.com/berkeley-scf/savio-biostat-2016</a>.  You can download the files by doing a git clone from a terminal window on a UNIX-like machine, as follows:</p>
+
+<pre><code class="r">git clone https://github.com/berkeley-scf/savio-biostat-2016
+</code></pre>
+
+<p>To create this HTML document, simply compile the corresponding R Markdown file in R as follows.</p>
+
+<pre><code class="r">Rscript -e &quot;library(knitr); knit2html(&#39;savio.Rmd&#39;)&quot;
+</code></pre>
+
+<p>This workshop material by Christopher Paciorek is licensed under a Creative Commons Attribution 3.0 Unported License.</p>
+
+<h1>1) Resources and links</h1>
+
+<p>This workshop is based in part on already-prepared SCF material and other documentation that you can look at for more details:</p>
+
+<ul>
+<li><a href="http://research-it.berkeley.edu/services/high-performance-computing">Instructions for using the Savio campus Linux cluster</a></li>
+<li><a href="https://github.com/berkeley-scf/tutorial-parallel-basics">Tutorial on shared memory parallel processing</a>, in particular the <a href="https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html">HTML overview</a></li>
+<li><a href="https://github.com/berkeley-scf/tutorial-parallel-distributed">Tutorial on distributed memory parallel processing</a>, in particular the <a href="https://rawgit.com/berkeley-scf/tutorial-parallel-distributed/master/parallel-dist.html">HTML overview</a></li>
+</ul>
+
+<h1>1) Overview of parallel processing paradigms</h1>
+
+<p>First, let&#39;s see some terms in <a href="https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html">Section 1.1 of the shared memory tutorial</a>. </p>
+
+<h2>1.1) Shared memory</h2>
+
+<p>For shared memory parallelism, each core is accessing the same memory
+so there is no need to pass information (in the form of messages)
+between different machines. </p>
+
+<p>The shared memory parallelism approaches that we&#39;ll cover are:</p>
+
+<ul>
+<li>threaded linear algebra (OpenBLAS, MKL, ACML) called from R</li>
+<li>multi-core computations using multiple processes via foreach or parallel apply/sapply/lapply</li>
+</ul>
+
+<h3>Threaded linear algebra</h3>
+
+<p>Threads are multiple paths of execution within a single process. Using
+<em>top</em> to monitor a job that is executing threaded code, you&#39;ll
+see the process using more than 100\% of CPU. When this occurs, the
+process is using multiple cores, although it appears as a single process
+rather than as multiple processes. In general, threaded code will
+detect the number of cores available on a machine and make use of
+them. However, you can also explicitly control the number of threads
+available to a process. </p>
+
+<p>In R, the only real use of threading is for threaded linear algebra. A fast BLAS (Basic Linear Algebra Subroutines) package can make a huge difference in terms of computational time for linear algebra involving large matrices/vectors. More information can be found in <a href="https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html">Section 2 of the shared memory tutorial</a> </p>
+
+<h2>1.2) Distributed memory</h2>
+
+<p>Parallel programming for distributed memory parallelism requires passing
+messages between the different nodes. The standard protocol for doing
+this is MPI, of which there are various versions, including <em>openMPI</em>.
+However, there is some functionality in R that allows you to exploit 
+multiple nodes without needing to know how to to use MPI.</p>
+
+<p>Some of the distributed memory approaches that we&#39;ll cover are:</p>
+
+<ul>
+<li>foreach and parallel apply/lapply/sapply with Rmpi, SNOW or pbdR backends in R</li>
+<li>parallel distributed linear algebra using pbdR</li>
+</ul>
+
+<p>Other distributed memory capabilities available for R that we won&#39;t cover include:</p>
+
+<ul>
+<li>direct use of MPI functionality via Rmpi and pbdMPI</li>
+<li>distributed computations with a distributed filesystem (HDFS) via SparkR </li>
+</ul>
+
+<h1>2) Parallel hardware resources</h1>
+
+<ul>
+<li><p>Biostatistics </p>
+
+<ul>
+<li>new cluster: 8 nodes x 24 cores/node; 64 Gb RAM per node; SGE queueing</li>
+</ul></li>
+<li><p>Savio (SLURM queueing)</p>
+
+<ul>
+<li>Department-owned nodes
+
+<ul>
+<li>Biostat (Mark/Alan) nodes: 8 nodes, 20 cores each</li>
+</ul></li>
+<li>Faculty Compute Allowance
+
+<ul>
+<li>~200,000 core-hours per year free per faculty member; can be delegated to grads/postdocs</li>
+<li>512 Gb RAM nodes available</li>
+<li>nodes with 2 GPUs each available</li>
+</ul></li>
+<li>Spark (not sure about SparkR) available on department nodes or FCA<br/></li>
+</ul></li>
+<li><p>Amazon EC2 and other cloud providers </p>
+
+<ul>
+<li>ability to start virtual machines and virtual clusters</li>
+<li>See <a href="https://github.com/berkeley-scf/parallelR-biostat-2015">my presentation for Biostat last year</a>, in particular the <a href="https://rawgit.com/berkeley-scf/parallelR-biostat-2015/master/parallel.pdf">PDF overview</a></li>
+</ul></li>
+</ul>
+
+<h1>3) Basic suggestions for parallelizing your code</h1>
+
+<p>The easiest situation is when your code is embarrassingly parallel,
+which means that the different tasks can be done independently and
+the results collected. When the tasks need to interact, things get
+much harder. Much of the material here is focused on embarrassingly
+parallel computation.</p>
+
+<p><a href="https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html">Section 4 of this tutorial</a> has some basic principles/suggestions for how to parallelize your computation.</p>
+
+<p>I&#39;m happy to help discuss specific circumstances, so just email <a href="mailto:consult@stat.berkeley.edu">consult@stat.berkeley.edu</a>.
+The new Berkeley Research Computing (BRC) initiative is also providing
+consulting on efficient parallelization strategies. If my expertise
+is not sufficient, I can help you get assistance from BRC.</p>
+
+<h1>4) Overview of using Savio</h1>
+
+<h1>4.1) Savio vs. the Biostat cluster</h1>
+
+<p>Note that while we&#39;ll focus on Savio, the setup of the Biostat cluster is similar and the R code shown here should work on the Biostat cluster as well. Note that on the Biostat much of the basic steps below won&#39;t be necessary. You&#39;ll often just need to submit the job [comment on submitting jobs to biostat].</p>
+
+<h1>4.2) Basic steps for using Savio</h1>
+
+<p>To use Savio, you either need permission from Alan or Mark to use the nodes they purchased within the Savio system, or you need to make use of the Faculty Computing Allowance of a faculty member you are working with. </p>
+
+<p>The basic steps for using Savio are:</p>
+
+<ul>
+<li><a href="https://docs.google.com/forms/d/1zpUuAV9kUICbyjJOzIT7N1i22t4ch-aBOFzDDmW0PQ4/viewform">getting an account</a> </li>
+<li><a href="http://research-it.berkeley.edu/services/high-performance-computing/logging-savio">logging on with a one-time password via the Pledge software</a>. Note that the password procedure will be changing shortly.</li>
+<li><a href="http://research-it.berkeley.edu/services/high-performance-computing/transferring-data">transferring data to Savio</a></li>
+<li><a href="http://research-it.berkeley.edu/services/high-performance-computing/accessing-and-installing-software">loading or installing any software you need</a></li>
+<li><a href="http://research-it.berkeley.edu/services/high-performance-computing/running-your-jobs">submitting your job(s)</a></li>
+</ul>
+
+<p>Once you logon, you can see what accounts you have access to:</p>
+
+<pre><code class="bash">sacctmgr -p show associations user=YOUR_NAME
+</code></pre>
+
+<p>You might see <code>co_biostat</code> or <code>fc_YOUR-ADVISOR</code>. </p>
+
+<p>Here I&#39;ll use an account I have access to <code>ac_scsguest</code>, but when you do this, use an account you have access to.</p>
+
+<h1>4.3) Submitting jobs</h1>
+
+<p>To run an interactive job for up to 30 minutes on one node:</p>
+
+<pre><code class="bash">srun -A ac_scsguest -p savio  -N 1 -t 30:0 --pty bash
+</code></pre>
+
+<p>To submit a non-interactive job on one node:</p>
+
+<pre><code class="bash">sbatch -A ac_scsguest -p savio  -N 1 -t 30:0 job.sh
+</code></pre>
+
+<p>You can also put the various flags (-A, -p, etc.) in the job submission file. For example, see job-template.sh, reproduced here:</p>
+
+<pre><code class="bash">#!/bin/bash
+#SBATCH --job-name=test
+#SBATCH -a ac_scsguest
+#SBATCH -p savio
+## or -p savio2 for co_biostat nodes
+#SBATCH -N 1
+#SBATCH -t 00:30:00
+#SBATCH --mail-user=paciorek@stat.berkeley.edu
+
+module load r
+R CMD BATCH --no-save file.R file.Rout
+</code></pre>
+
+<p>and you could submit simply as</p>
+
+<pre><code class="bash">sbatch job.sh
+</code></pre>
+
+<p>Finally, here&#39;s an example of a job submission that uses multiple nodes, requesting 40 cores in this case. In general, you&#39;re probably best off requesting based on the number of cores rather than the number of nodes if you&#39;re then going to use R functionality that spreads work across many individual cores, as the UNIX environment variables will be set up in a more helpful way.</p>
+
+<pre><code class="bash">#!/bin/bash
+#SBATCH --job-name=test
+#SBATCH -a ac_scsguest
+#SBATCH -p savio
+#SBATCH -n 40
+#SBATCH -t 00:30:00
+#SBATCH --mail-user=paciorek@stat.berkeley.edu
+
+module load r
+R CMD BATCH --no-save file.R file.Rout
+</code></pre>
+
+<p>We&#39;ll see the specific syntax for how to start R in later sections.</p>
+
+<p>Since you &#39;pay&#39; for all the cores on one node, it&#39;s best to set up your code to use at multiples of 20 (savio) or 24 (savio2) cores. You can also explore the <code>savio2_htc</code> partition via <code>-p savio2_htc</code> that allows you to use one or more individual cores that are faster than the cores on the regular nodes. </p>
+
+<h1>4.4) Environment variables</h1>
+
+<p>SLURM provides a variety of UNIX environment variables that you can use to implement your parallelization without having to hard code the number of cores and related information.</p>
+
+<p>Some useful ones (these are not always available, depending on what flags you use to start your job) are: <em>SLURM_CPUS_ON_NODE</em> and <em>SLURM_NTASKS</em>.</p>
+
+<h1>4.5) Installing R packages</h1>
+
+<p>This can be a bit tricky, because while Savio makes a lot of software available, most of it is not loaded by default.</p>
+
+<p>To see what R packages are already installed:</p>
+
+<pre><code class="bash">module load r
+module avail
+# now pick the packages you need:
+module load plyr
+</code></pre>
+
+<p>To install a package</p>
+
+<p>We&#39;ll use <em>doSNOW</em> later, so let&#39;s see how that installation goes. Note that packages will be installed by default in your home directory in R/x86_64-unknown-linux-gnu-library/3.1. For many packages (those that compile C/C++/Fortran code) it&#39;s important to unload the <em>intel</em> module as this conflicts with default R package installation.</p>
+
+<pre><code class="bash">module unload intel # not necessary for doSNOW specifically
+Rscript -e &quot;install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.cnr.berkeley.edu&#39;)&quot;
+</code></pre>
+
+<p>However, not infrequently, installation of an R package (or its dependencies) requires a system package to be installed. Some of these might be available via <code>module load</code>, while others will not. For more guidance, contact <a href="mailto:brc-hpc-help@lists.berkeley.edu">brc-hpc-help@lists.berkeley.edu</a> or feel free to contact me (<a href="mailto:consult@stat.berkeley.edu">consult@stat.berkeley.edu</a>) directly.</p>
+
+<p>At the moment R is an older version (3.1.1) and unlike on the Biostat or Statistics clusters, R does not use a fast BLAS, which means your linear algebra may be an order of magnitude or more slower than it could be. If this is important to you, email Burke or <a href="mailto:consult@stat.berkeley.edu">consult@stat.berkeley.edu</a> for guidance on installing your own version of R that uses the fast MKL BLAS that is available on Savio.</p>
+
+<h2>4.6) Getting help with Savio</h2>
+
+<ul>
+<li>For technical issues and questions about using Savio: email <a href="mailto:brc-hpc-help@lists.berkeley.edu">brc-hpc-help@lists.berkeley.edu</a>.</li>
+<li>For questions about computing resources in general, including cloud computing: email <a href="mailto:brc@berkeley.edu">brc@berkeley.edu</a>.</li>
+<li>For questions about data management (including HIPAA-protected data): email <a href="mailto:researchdata@berkeley.edu">researchdata@berkeley.edu</a>.</li>
+</ul>
+
+<p>I can also help with some of these topics (less so with data management): email <a href="mailto:consult@stat.berkeley.edu">consult@stat.berkeley.edu</a>.</p>
+
+<h1>5) Parallel R</h1>
+
+<p>One key thing to note here is that for parallelizing independent iterations/replications of a computation (Sections 5.2 and 5.3 here) there are a zillion ways to do this in R, with a variety of functions you can use (foreach, parLapply, mclapply) and a variety of parallel functionality behind the scenes (MPI, SNOW, sockets, pbdR). They&#39;ll all likely have similar computation time, so whatever you can make work is likely to be fine. </p>
+
+<h1>5.1) Savio vs. the Biostat cluster</h1>
+
+<p>We&#39;ll focus on doing this on Savio, but the R syntax should work on the Biostat cluster and the way you start the R job should be very similar. The submission of the job to the cluster differs based on the different scheduler software in use: the Biostat cluster uses SGE and Savio uses SLURM. So on the biostat cluster you&#39;d submit jobs with the SGE submission syntax (<em>qsub</em>, <em>qrsh</em>). And when specifying how many cores your job has access to, you will probably need to use different environment variables, most likely the <em>$NSLOTS</em> variable.  Also on the biostat cluster, you&#39;re limited to at most 72 cores for a job.</p>
+
+<h2>5.1) Threaded linear algebra</h2>
+
+<p>As mentioned above, R on Savio is not linked to a threaded BLAS, but in the future, or if you install your own copy of R linked to MKL BLAS, you can do something like this so you use threaded linear algebra:</p>
+
+<pre><code class="bash">export OMP_NUM_THREADS=$SLURM_CPUS_ON_NODE
+# or use a fixed number: 
+# export OMP_NUM_THREADS=8
+R CMD BATCH --no-save file.R file.Rout
+</code></pre>
+
+<p>This should work on the Biostat cluster, on which R is linked to the fast threaded BLAS called openBLAS (I believe).  You&#39;ll probably need to use the SGE environment variable $NSLOTS in place of $SLURM_CPUS_ON_NODE (presuming you are using a single node and want all of the requested cores used for threading).</p>
+
+<h2>5.2) foreach and parallel apply on one node</h2>
+
+<p>Here&#39;s the code to use foreach on a single node with the standard multicore (<em>doParallel</em>) backend.</p>
+
+<pre><code class="r"># example invocation
+# sbatch -A ac_scsguest -p savio  -N 1 -t 30:0 job.sh
+#
+# job.sh:
+# R CMD BATCH --no-save foreach-multicore.R foreach-multicore.Rout
+
+install.packages(&#39;doParallel&#39;, repos = &#39;http://cran.cnr.berkeley.edu&#39;)
+
+library(doParallel)
+taskFun &lt;- function(){
+    mn &lt;- mean(rnorm(10000000))
+    return(mn)
+}
+nCores &lt;- Sys.getenv(&#39;SLURM_CPUS_ON_NODE&#39;)
+registerDoParallel(nCores) 
+
+nTasks &lt;- 60
+print(system.time(out &lt;- foreach(i = 1:nTasks) %dopar% {
+    cat(&#39;Starting &#39;, i, &#39;th job.\n&#39;, sep = &#39;&#39;)
+    outSub &lt;- taskFun()
+    cat(&#39;Finishing &#39;, i, &#39;th job.\n&#39;, sep = &#39;&#39;)
+    outSub # this will become part of the out object
+}))
+</code></pre>
+
+<p>And here&#39;s code for using the parallel apply functionality provided in the <em>parallel</em> package.</p>
+
+<h2>5.3) foreach and parallel apply on multiple nodes</h2>
+
+<p>When trying to run parallel R code across multiple nodes, there needs to be some back-end work done to distribute the work across the nodes. There are a variety of tools for this. </p>
+
+<h3>5.3.1) distributed parallel apply</h3>
+
+<p>We can use parallel apply functionality from the <em>parallel</em> package across multiple nodes using <em>sockets</em>.</p>
+
+<pre><code class="r"># example invocation
+# sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
+#
+# job.sh:
+# R CMD BATCH --no-save parallel-apply-distributed.R parallel-apply-distributed.Rout
+
+library(parallel)
+
+machines=rep(strsplit(Sys.getenv(&quot;SLURM_NODELIST&quot;), &quot;,&quot;)[[1]],
+             each = as.numeric(Sys.getenv(&quot;SLURM_CPUS_ON_NODE&quot;)) )
+
+cl = makeCluster(machines)
+
+nTasks &lt;- 60
+input &lt;- 1:nTasks
+
+taskFun &lt;- function(){
+        mn &lt;- mean(rnorm(1000000))
+        return(mn)
+}
+
+# if the processes need objects (x and y, here) from the master&#39;s workspace:
+# clusterExport(cl, c(&#39;x&#39;, &#39;y&#39;))
+
+res &lt;- parSapply(cl, input, taskFun)
+</code></pre>
+
+<h3>5.3.2) foreach + doSNOW</h3>
+
+<p>SNOW is a nice package that parallelizes computations across a network of machines in a simple fashion. Here&#39;s one way one can use it with foreach that again makes use of sockets. We need to specify the names of the nodes our job has been allocated and the number of processes per node, so we construct that from the environment variables that SLURM makes available.</p>
+
+<pre><code class="r"># example invocation
+# sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
+#
+# job.sh:
+# R CMD BATCH --no-save foreach-doSNOW.R foreach-doSNOW.Rout
+
+install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.cnr.berkeley.edu&#39;)
+
+library(doSNOW)
+machines=rep(strsplit(Sys.getenv(&quot;SLURM_NODELIST&quot;), &quot;,&quot;)[[1]],
+             each = as.numeric(Sys.getenv(&quot;SLURM_CPUS_ON_NODE&quot;)) )
+
+cl = makeCluster(machines)
+
+registerDoSNOW(cl)
+
+taskFun &lt;- function(){
+    mn &lt;- mean(rnorm(10000000))
+    return(mn)
+}
+
+nTasks &lt;- 120
+
+print(system.time(out &lt;- foreach(i = 1:nTasks) %dopar% {
+    outSub &lt;- taskFun()
+    outSub # this will become part of the out object
+}))
+</code></pre>
+
+<h3>5.3.3) foreach + doMPI</h3>
+
+<p>I find this to be more of a hassle than doSNOW (with the socket cluster type), because (1) you have to start R via <em>mpirun</em>, (2) installing Rmpi can be a hassle, and (3) you can&#39;t really use it interactively. But if you want to do it, it&#39;s possible to use Rmpi as the backend for foreach and for parallel apply. </p>
+
+<pre><code class="r"># example invocation
+# sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
+#
+# job.sh:
+# module load r openmpi Rmpi
+# mpirun -np $SLURM_NTASKS R CMD BATCH --no-save foreach-doMPI.R foreach-doMPI.Rout
+
+
+library(doMPI)
+
+cl = startMPIcluster()  # by default will start one fewer workers than SLURM_NTASKS (one for master) -- you may want to change this to have one worker on all cores
+
+nTasks &lt;- 120
+
+registerDoMPI(cl)
+print(clusterSize(cl)) # just to check
+
+taskFun &lt;- function(){
+    mn &lt;- mean(rnorm(10000000))
+    return(mn)
+}
+
+print(system.time(out &lt;- foreach(i = 1:nTasks) %dopar% {
+    cat(&#39;Starting &#39;, i, &#39;th job.\n&#39;, sep = &#39;&#39;)
+    outSub &lt;- taskFun()
+    cat(&#39;Finishing &#39;, i, &#39;th job.\n&#39;, sep = &#39;&#39;)
+    outSub # this will become part of the out object
+}))
+
+
+closeCluster(cl)
+
+mpi.quit()
+</code></pre>
+
+<h2>5.4) pbdR</h2>
+
+<p>There is a relatively new effort to enhance R&#39;s capability for distributed
+memory processing called <em>pbdR</em>. pbdR is designed for
+SPMD processing in batch mode, which means that you start up multiple
+processes in a non-interactive fashion using mpirun. </p>
+
+<p>pbdR provides the following capabilities:</p>
+
+<ul>
+<li>the ability to do distributed linear algebra by interfacing to <em>ScaLapack</em>,</li>
+<li>the ability to do some parallel apply-style computations, and</li>
+<li>an alternative to Rmpi for interfacing with MPI.</li>
+</ul>
+
+<p>Personally, I think the first of the three is the most exciting as
+it&#39;s a functionality not readily available in R or even more generally
+in other readily-accessible software.</p>
+
+<h1>5.4.1) Installation and running a pbdR job</h1>
+
+<p>The file <em>install_pbdR.sh</em> shows how to install pbdR (pbdR is a collection of inter-related packages). It&#39;s actually very easy to install from CRAN, except that just for the next month or so, there is a bug that causes problems with doing distributed linear algebra, so I&#39;m having to install pbdBASE from the developers&#39; Github repository.</p>
+
+<p>One runs pbdR code via mpirun as follows:</p>
+
+<pre><code class="bash">mpirun Rscript file.R &gt; file.out
+</code></pre>
+
+<h1>5.4.2) Distributed linear algebra</h1>
+
+<p>Here&#39;s how you would set up a distributed matrix and do linear
+algebra on it. Note that when working with large matrices, you would
+generally want to construct the matrices (or read from disk) in a
+parallel fashion rather than creating the full matrix on one worker.</p>
+
+<pre><code class="r"># example invocation
+# sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
+#
+# job.sh:
+# module load r openmpi
+# mpirun Rscript pbd-linalg.R &gt; pbd-linalg.Rout
+
+library(pbdDMAT, quiet = TRUE )
+
+n &lt;- 4096*4  # 16k by 16k matrix
+
+init.grid()
+
+if(comm.rank()==0) print(date())
+
+# pbd allows for parallel I/O, but here
+# we keep things simple and distribute
+# an object from one process
+if(comm.rank() == 0) {
+    x &lt;- rnorm(n^2)
+    dim(x) &lt;- c(n, n)
+} else x &lt;- NULL
+dx &lt;- as.ddmatrix(x)
+
+# sigma = X&#39;*X
+timing &lt;- comm.timer(sigma &lt;- crossprod(dx))
+
+if(comm.rank()==0) {
+    print(date())
+    print(timing)
+}
+
+# Cholesky factor of sigma
+timing &lt;- comm.timer(out &lt;- chol(sigma))
+
+if(comm.rank()==0) {
+    print(date())
+    print(timing)
+}
+
+
+finalize()
+</code></pre>
+
+<p>As a quick, completely non-definitive point of comparison, doing the
+crossproduct and Cholesky for the 16000x16000 matrix with 
+80 cores using pbdR took 39 seconds (crossproduct) and 14 seconds (Cholesky)
+while doing with 8 threads using openBLAS on a separate server (different hardware)
+took 70 seconds (crossproduct) and 40 seconds (Cholesky). So my sense is that you
+can get speedups but the scaling is far from optimal.</p>
+
+<h1>5.4.3) Parallel apply</h1>
+
+<p>Here&#39;s some basic syntax for doing a distributed apply on
+a matrix that is on one of the workers (i.e., the matrix is not distributed).</p>
+
+<pre><code class="r"># example invocation
+# sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
+#
+# job.sh:
+# module load r openmpi
+# mpirun Rscript pbd-apply.R &gt; pbd-apply.Rout
+
+library(pbdMPI, quiet = TRUE )
+init()
+
+if(comm.rank()==0) {
+    x &lt;- matrix(rnorm(1e6*50), 1e6)
+}
+
+sm &lt;- comm.timer(pbdApply(x, 1, mean, pbd.mode = &#39;mw&#39;, rank.source = 0))
+if(comm.rank()==0) {
+    print(sm)
+}
+
+finalize()
+</code></pre>
+
+<h1>5.4.4) Interfacing with MPI</h1>
+
+<p>Here&#39;s an example of distributing an embarrassingly parallel calculation
+(estimating an integral via Monte Carlo - in this case estimating
+the value of \(pi\)), using MPI functionality.</p>
+
+<pre><code class="r"># example invocation
+# sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
+#
+# job.sh:
+# module load r openmpi
+# mpirun Rscript pbd-mpi.R &gt; pbd-mpi.Rout
+
+
+library(pbdMPI, quiet = TRUE )
+init()
+
+myRank &lt;- comm.rank() # comm index starts at 0 , not 1
+comm.print(myRank , all.rank=TRUE)
+
+if(myRank == 0) {
+    comm.print(paste0(&quot;hello, world from the master: &quot;, myRank), all.rank=TRUE)
+} else comm.print(paste0(&quot;hello from &quot;, myRank), all.rank=TRUE)
+
+if(comm.rank() == 0) print(date())
+set.seed(myRank)  # see Section 9 for more on parallel random number generation
+N.gbd &lt;- 1e7
+X.gbd &lt;- matrix ( runif ( N.gbd * 2) , ncol = 2)
+r.gbd &lt;- sum ( rowSums ( X.gbd^2) &lt;= 1)
+ret &lt;- allreduce ( c ( N.gbd , r.gbd ) , op = &quot;sum&quot; )
+PI &lt;- 4 * ret [2] / ret [1]
+comm.print(paste0(&quot;Pi is roughly: &quot;, PI))
+if(comm.rank() == 0) print(date())
+
+finalize ()
+</code></pre>
+
+<h1>6) Storing and transferring large datasets</h1>
+
+<p>There are a variety of storage resources available through Berkeley. This does not include AWS and other resources that would cost additional money; there are lots of cloud resources  for storing large amounts of data not discussed here.</p>
+
+<h2>6.1) Savio storage</h2>
+
+<p>Savio provides a modest amount of backed-up storage in your home directory (10 Gb per user) and for condo groups (200 Gb per group) and a lot of storage on in the scratch directory that is not backed up but which can be accessed very quickly from the compute nodes. There is no quota on space in scratch but also no guarantee that it won&#39;t be erased in the future (files that have been touched less recently will be deleted first, I believe). However, if you can get the data again, either by downloading it from elsewhere or regenerating it with your code, scratch is a good place to keep large amounts of data while you&#39;re working with it.</p>
+
+<p>A new service that Savio will provide in the near future is called <em>condo storage</em>. groups will be able to purchase dedicated storage on the order of terabytes at a good price that will be accessible from Savio.</p>
+
+<p>You can use SCF, SFTP, rsync, etc. to transfer from your laptop to the Savio data transfer node: dtn.brc.berkeley.edu.</p>
+
+<p>You can use Globus Connect to transfer data data to/from Savio (and between other resources) quickly and unattended. This is a better choice for large transfers.</p>
+
+<h2>6.2) Globus Connect</h2>
+
+<p>For larger transfers and for making unattended transfers that will continue in the background, Globus Connect is a good option. Here are some <a href="http://research-it.berkeley.edu/services/high-performance-computing/using-globus-connect-savio">instructions</a>.</p>
+
+<p>Globus transfers data between <em>endpoints</em>. Possible endpoints include: Savio, your laptop or desktop, NERSC, the SCF, and XSEDE, among others.</p>
+
+<p>If you are transferring to/from your laptop, you&#39;ll need Globus Connect Personal set up and running on your machine and you&#39;ll need to establish your machine as an endpoint.</p>
+
+<p>If you&#39;re transferring to/from two existing endpoints (Savio, NERSC, SCF, XSEDE, etc.), then you can just do this via a browser. If there&#39;s demand, I suspect Burke would set up the Biostat network as an endpoint.</p>
+
+<p>Globus also provides a <a href="https://docs.globus.org/cli/using-the-cli">command line interface</a> that will allow you to do transfers programmatically, such that a transfer could be embedded in a workflow script.</p>
+
+<h2>6.3) Box</h2>
+
+<p>Box provides <strong>unlimited</strong>, free, secured, and encrypted content storage of files with a maximum file size of 15 Gb to Berkeley affiliates. So it&#39;s a good option for backup and long-term storage. </p>
+
+<p>You can move files between Box and your laptop using the Box Sync app. And you can interact with Box via a web browser at [box.berkeley.edu].</p>
+
+<p>The best way to move files between Box and Savio is <a href="http://research-it.berkeley.edu/services/high-performance-computing/transferring-data-between-savio-and-your-uc-berkeley-box-account">via lftp as discussed here</a>. </p>
+
+<p>Here&#39;s how you logon to box via ltp on Savio (assuming you&#39;ve set up an external password already as described in the link above):</p>
+
+<pre><code class="bash">ssh my_savio_user_name@dtn.brc.berkeley.edu
+lftp ftp.box.com
+set ssl-allow true
+user username@berkeley.edu
+</code></pre>
+
+<pre><code class="bash">lpwd # on Savio
+ls # on box
+!ls # on Savio
+mkdir workshops
+cd workshops # on box
+lcd savio-biostat-2016 # on savio
+put doMPI.R # savio to box
+get AirlineDataAll.ffData  # box to savio; 1.4 Gb in ~ 1 minute
+</code></pre>
+
+<p>One additional command that can be quite useful is <em>mirror</em>, which lets you copy an entire directory to/from Box.</p>
+
+<pre><code># to upload a directory from Savio to Box 
+mirror -R mydir
+# to download a directory from Box to Savio
+mirror mydir .
+</code></pre>
+
+<p>Be careful, because it&#39;s fairly easy to wipe out files or directories on Box.</p>
+
+<p>Finally you can set up <em>special purpose accounts</em> (Berkeley SPA) so files are owned at a project level rather than by individuals.</p>
+
+<p>BRC is working (long-term) on making Globus available for transfer to/from Box, but it&#39;s not available yet.</p>
+
+<h2>6.4) Transfer to/from bDrive (Google Drive)</h2>
+
+<p>bDrive provides <strong>unlimited</strong>, free, secured, and encrypted content storage of files with a maximum file size of 5 Tb to Berkeley affiliates.</p>
+
+<p>You can move files to and from your laptop using the Google Drive app. </p>
+
+<p>There are also some third-party tools for copying files to/from Google Drive, though I&#39;ve found them to be a bit klunky. This is why I&#39;d recommend using Box for workflows at this point. However, BRC is also working (short-term) on making Globus available for transfer to/from bDrive, though it&#39;s not available yet.</p>
+
+</body>
+
+</html>
