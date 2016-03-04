@@ -1,2 +1,7 @@
 # savio-biostat-2016
-Materials for presentation on use of the Savio campus cluster for UC Berkeley Biostatistics researchers, focusing on job submission, parallel R, and storing/transferring large datasets.
+
+Materials for presentation to UC Berkeley Biostatistics researchers, focusing on
+
+ - use of the Savio campus cluster,
+ - parallel R (particularly for Savio), and
+ - campus resources for storing/transferring large datasets.

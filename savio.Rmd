@@ -1,0 +1,438 @@
+Workshop on Savio, Parallel R, and Data Storage, March 2016
+==============================================================
+
+Chris Paciorek, Department of Statistics and 
+Berkeley Research Computing, UC Berkeley
+
+```{r setup, include=FALSE}
+library(knitr)
+# read_chunk('savio.R')
+read_chunk('foreach-multicore.R')     
+read_chunk('parallel-apply-multicore.R')     
+read_chunk('parallel-apply-distributed.R')
+read_chunk('foreach-doSNOW.R')
+read_chunk('foreach-doMPI.R')
+read_chunk('pbd-mpi.R')
+read_chunk('pbd-apply.R')
+read_chunk('pbd-linalg.R')
+```
+
+# 0) This Workshop
+
+This tutorial covers how to use Savio, basic strategies for using parallel processing in R, primarily on Savio, and campus resources for storing and transferring data.
+
+Savio is the (fairly) new campus high-performance computing cluster, run by [Berkeley Research Computing](http://research-it.berkeley.edu/programs/berkeley-research-computing).
+
+This tutorial assumes you have a working knowledge of R and the basics of the UNIX/Linux command line.
+
+Materials for this tutorial, including the R markdown file and associated code files that were used to create this document are available on Github at https://github.com/berkeley-scf/savio-biostat-2016.  You can download the files by doing a git clone from a terminal window on a UNIX-like machine, as follows:
+```{r, clone, eval=FALSE}
+git clone https://github.com/berkeley-scf/savio-biostat-2016
+```
+
+To create this HTML document, simply compile the corresponding R Markdown file in R as follows.
+```{r, build-html, eval=FALSE}
+Rscript -e "library(knitr); knit2html('savio.Rmd')"
+```
+This workshop material by Christopher Paciorek is licensed under a Creative Commons Attribution 3.0 Unported License.
+
+
+# 1) Resources and links
+
+This workshop is based in part on already-prepared SCF material and other documentation that you can look at for more details:
+
+ - [Instructions for using the Savio campus Linux cluster](http://research-it.berkeley.edu/services/high-performance-computing)
+ - [Tutorial on shared memory parallel processing](https://github.com/berkeley-scf/tutorial-parallel-basics), in particular the [HTML overview](https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html)
+ - [Tutorial on distributed memory parallel processing](https://github.com/berkeley-scf/tutorial-parallel-distributed), in particular the [HTML overview](https://rawgit.com/berkeley-scf/tutorial-parallel-distributed/master/parallel-dist.html)
+
+
+# 1) Overview of parallel processing paradigms
+
+First, let's see some terms in [Section 1.1 of the shared memory tutorial](https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html). 
+
+## 1.1) Shared memory
+
+For shared memory parallelism, each core is accessing the same memory
+so there is no need to pass information (in the form of messages)
+between different machines. 
+
+The shared memory parallelism approaches that we'll cover are:
+ - threaded linear algebra (OpenBLAS, MKL, ACML) called from R
+ - multi-core computations using multiple processes via foreach or parallel apply/sapply/lapply
+ 
+
+### Threading linear algebra
+
+Threads are multiple paths of execution within a single process. Using
+*top* to monitor a job that is executing threaded code, you'll
+see the process using more than 100\% of CPU. When this occurs, the
+process is using multiple cores, although it appears as a single process
+rather than as multiple processes. In general, threaded code will
+detect the number of cores available on a machine and make use of
+them. However, you can also explicitly control the number of threads
+available to a process. 
+
+In R, the only real use of threading is for threaded linear algebra. A fast BLAS (Basic Linear Algebra Subroutines) package can make a huge difference in terms of computational time for linear algebra involving large matrices/vectors. More information can be found in [Section 2 of the shared memory tutorial](https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html) 
+
+
+## 1.2) Distributed memory
+
+Parallel programming for distributed memory parallelism requires passing
+messages between the different nodes. The standard protocol for doing
+this is MPI, of which there are various versions, including *openMPI*.
+However, there is some functionality in R that allows you to exploit 
+multiple nodes without needing to know how to to use MPI.
+
+Some of the distributed memory approaches that we'll cover are:
+ - foreach and parallel apply/lapply/sapply with Rmpi, SNOW or pbdR backends in R
+ - parallel distributed linear algebra using pbdR
+
+Other distributed memory capabilities available for R that we won't cover include:
+ - direct use of MPI functionality via Rmpi and pbdMPI
+ - distributed computations with a distributed filesystem (HDFS) via SparkR 
+ 
+# 2) Parallel hardware resources
+
+ - Biostatistics 
+   - new cluster: 8 nodes x 24 cores/node; 64 Gb RAM per node; SGE queueing
+
+ - Savio (SLURM queueing)
+   - Department-owned nodes
+     - Biostat (Mark/Alan) nodes: 8 nodes, 20 cores each
+   - Faculty Compute Allowance
+     - ~200,000 core-hours per year free per faculty member; can be delegated to grads/postdocs
+     - 512 Gb RAM nodes available
+     - nodes with 2 GPUs each available
+   - Spark (not sure about SparkR) available on department nodes or FCA    
+
+ - Amazon EC2 and other cloud providers 
+   - ability to start virtual machines and virtual clusters
+   - See [my talk last year](https://github.com/berkeley-scf/parallelR-biostat-2015), in particular the [PDF overview](https://rawgit.com/berkeley-scf/parallelR-biostat-2015/master/parallel.pdf)
+
+# 3) Basic suggestions for parallelizing your code
+
+The easiest situation is when your code is embarrassingly parallel,
+which means that the different tasks can be done independently and
+the results collected. When the tasks need to interact, things get
+much harder. Much of the material here is focused on embarrassingly
+parallel computation.
+
+[Section 4 of this tutorial](https://rawgit.com/berkeley-scf/tutorial-parallel-basics/master/parallel-basics.html) has some basic principles/suggestions for basic principles/suggestions for how to parallelize your computation.
+
+I'm happy to help discuss specific circumstances, so just email consult@stat.berkeley.edu.
+The new Berkeley Research Computing (BRC) initiative is also providing
+consulting on efficient parallelization strategies. If my expertise
+is not sufficient, I can help you get assistance from BRC.
+
+# 4) Overview of using Savio
+
+# 4.1) Savio vs. the Biostat cluster
+
+Note that while we'll focus on Savio, the setup of the Biostat cluster is similar and the R code shown here should work on the Biostat cluster as well. Note that on the Biostat much of the basic steps below won't be necessary. You'll often just need to submit the job [comment on submitting jobs to biostat].
+
+# 4.2) Basic steps for using Savio
+
+To use Savio, you either need permission from Alan or Mark to use the nodes they purchased within the Savio system, or you need to make use of the Faculty Computing Allowance of a faculty member you are working with. 
+
+The basic steps for using Savio are:
+
+ - [getting an account](https://docs.google.com/forms/d/1zpUuAV9kUICbyjJOzIT7N1i22t4ch-aBOFzDDmW0PQ4/viewform) 
+ - [logging on with a one-time password via the Pledge software](http://research-it.berkeley.edu/services/high-performance-computing/logging-savio). Note that the password procedure will be changing shortly.
+ - [transferring data to Savio](http://research-it.berkeley.edu/services/high-performance-computing/transferring-data)
+ - [loading or installing any software you need](http://research-it.berkeley.edu/services/high-performance-computing/accessing-and-installing-software)
+ - [submitting your job(s)](http://research-it.berkeley.edu/services/high-performance-computing/running-your-jobs)
+
+Once you logon, you can see what accounts you have access to:
+
+```{r, sacct, eval=FALSE, engine='bash'}
+sacctmgr -p show associations user=YOUR_NAME
+```
+
+You might see `co_biostat` or `fc_YOUR-ADVISOR`. 
+
+Here I'll use an account I have access to `ac_scsguest`, but when you do this, use an account you have access to.
+
+# 4.3) Submitting jobs
+
+To run an interactive job for up to 30 minutes on one node:
+```{r, sacct, eval=FALSE, engine='bash'}
+srun -A ac_scsguest -p savio  -N 1 -t 30:0 --pty bash
+```
+
+To submit a non-interactive job on one node:
+```{r, sbatch, eval=FALSE, engine='bash'}
+sbatch -A ac_scsguest -p savio  -N 1 -t 30:0 job.sh
+```
+
+You can also put the various flags (-A, -p, etc.) in the job submission file. For example, see job-template.sh, reproduced here:
+
+```{r, job-template, engine='bash', eval=FALSE}
+#!/bin/bash
+#SBATCH --job-name=test
+#SBATCH -a ac_scsguest
+#SBATCH -p savio
+## or -p savio2 for co_biostat nodes
+#SBATCH -N 1
+#SBATCH -t 00:30:00
+#SBATCH --mail-user=paciorek@stat.berkeley.edu
+
+module load r
+R CMD BATCH --no-save file.R file.Rout
+```
+
+and you could submit simply as
+```{r, sbatch2, eval=FALSE, engine='bash'}
+sbatch job.sh
+```
+
+Finally, here's an example of a job submission that uses multiple nodes, requesting 40 cores in this case. In general, you're probably best off requesting based on the number of cores rather than the number of nodes if you're then going to use R functionality that spreads work across many individual cores, as the UNIX environment variables will be set up in a more helpful way.
+
+```{r, job-template-multiple-nodes, engine='bash', eval=FALSE}
+#!/bin/bash
+#SBATCH --job-name=test
+#SBATCH -a ac_scsguest
+#SBATCH -p savio
+#SBATCH -n 40
+#SBATCH -t 00:30:00
+#SBATCH --mail-user=paciorek@stat.berkeley.edu
+
+module load r
+R CMD BATCH --no-save file.R file.Rout
+```
+
+We'll see the specific syntax for how to start R in later sections.
+
+Since you 'pay' for all the cores on one node, it's best to set up your code to use at multiples of 20 (savio) or 24 (savio2) cores. You can also explore the `savio2_htc` partition via `-p savio2_htc` that allows you to use one or more individual cores that are faster than the cores on the regular nodes. 
+
+# 4.4) Environment variables
+
+SLURM provides a variety of UNIX environment variables that you can use to implement your parallelization without having to hard code the number of cores and related information.
+
+Some useful ones (these are not always available, depending on what flags you use to start your job) are: *SLURM_CPUS_ON_NODE* and *SLURM_NTASKS*.
+
+# 4.5) Installing R packages
+
+This can be a bit tricky, because while Savio makes a lot of software available, most of it is not loaded by default.
+
+To see what R packages are already installed:
+
+```{r, modules, engine='bash', eval=FALSE}
+module load r
+module avail
+# now pick the packages you need:
+module load plyr
+```
+
+To install a package
+
+We'll use *doSNOW* later, so let's see how that installation goes. Note that packages will be installed by default in your home directory in R/x86_64-unknown-linux-gnu-library/3.1. For many packages (those that compile C/C++/Fortran code) it's important to unload the *intel* module as this conflicts with default R package installation.
+
+```{r, install, engine='bash', eval=FALSE}
+module unload intel # not necessary for doSNOW specifically
+Rscript -e "install.packages(c('doSNOW'), repos = 'http://cran.cnr.berkeley.edu')"
+```
+
+However, not infrequently, installation of an R package (or its dependencies) requires a system package to be installed. Some of these might be available via `module load`, while others will not. For more guidance, contact [brc-hpc-help@lists.berkeley.edu] or feel free to contact me ([consult@stat.berkeley.edu]) directly.
+
+At the moment R is an older version (3.1.1) and unlike on the Biostat or Statistics clusters, R does not use a fast BLAS, which means your linear algebra may be an order of magnitude or more slower than it could be. If this is important to you, email Burke or [consult@stat.berkeley.edu] for guidance on installing your own version of R that uses the fast MKL BLAS that is available on Savio.
+
+# 5) Parallel R on Savio
+
+One key thing to note here is that for parallelizing independent iterations/replications of a computation (Sections 5.2 and 5.3 here) there are a zillion ways to do this in R, with a variety of functions you can use (foreach, parLapply, mclapply) and a variety of parallel functionality behind the scenes (MPI, SNOW, sockets, pbdR). They'll all likely have similar computation time, so whatever you can make work is likely to be fine. 
+
+## 5.1) Threaded linear algebra
+
+As mentioned above, R on Savio is not linked to a threaded BLAS, but in the future, or if you install your own copy of R linked to MKL BLAS, you can do something like this so you use threaded linear algebra:
+
+```{r, threading, eval=FALSE, engine='bash'}
+export OMP_NUM_THREADS=$SLURM_CPUS_ON_NODE
+# or use a fixed number: 
+# export OMP_NUM_THREADS=8
+R CMD BATCH --no-save file.R file.Rout
+```
+
+This should work on the Biostat cluster, on which R is linked to the fast threaded BLAS called openBLAS (I believe).  You'll probably need to use the SGE environment variable $NSLOTS in place of $SLURM_CPUS_ON_NODE (presuming you are using a single node and want all of the requested cores used for threading).
+
+## 5.2) foreach and parallel apply on one node
+
+Here's the code to use foreach on a single node with the standard multicore (*doParallel*) backend.
+
+```{r, foreach-multicore, eval=FALSE}
+```
+
+And here's code for using the parallel apply functionality provided in the *parallel* package.
+
+```{r, parallel-apply-multicore.R, eval=FALSE}
+```
+
+## 5.3) foreach and parallel apply on multiple nodes
+
+When trying to run parallel R code across multiple nodes, there needs to be some back-end work done to distribute the work across the nodes. There are a variety of tools for this. 
+
+### 5.3.1) distributed parallel apply
+
+We can use parallel apply functionality from the *parallel* package across multiple nodes using *sockets*.
+
+```{r, parallel-apply-distributed, eval=FALSE}
+```
+
+### 5.3.2) foreach + doSNOW
+
+SNOW is a nice package that parallelizes computations across a network of machines in a simple fashion. Here's one way one can use it with foreach that again makes use of sockets. We need to specify the names of the nodes our job has been allocated and the number of processes per node, so we construct that from the environment variables that SLURM makes available.
+
+```{r, foreach-doSNOW, eval=FALSE}
+```
+
+### 5.3.3) foreach + doMPI
+
+I find this to be more of a hassle than doSNOW (with the socket cluster type), because (1) you have to start R via *mpirun*, (2) installing Rmpi can be a hassle, and (3) you can't really use it interactively. But if you want to do it, it's possible to use Rmpi as the backend for foreach and for parallel apply. 
+
+```{r, foreach-doMPI, eval=FALSE}
+```
+
+## 5.4) pbdR
+
+There is a relatively new effort to enhance R's capability for distributed
+memory processing called *pbdR*. pbdR is designed for
+SPMD processing in batch mode, which means that you start up multiple
+processes in a non-interactive fashion using mpirun. 
+
+pbdR provides the following capabilities:
+ - the ability to do distributed linear algebra by interfacing to *ScaLapack*,
+ - the ability to do some parallel apply-style computations, and
+ - an alternative to Rmpi for interfacing with MPI.
+
+Personally, I think the first of the three is the most exciting as
+it's a functionality not readily available in R or even more generally
+in other readily-accessible software.
+
+# 5.4.1) Installation and running a pbdR job
+
+The file *install_pbdR.sh* shows how to install pbdR (pbdR is a collection of inter-related packages). It's actually very easy to install from CRAN, except that just for the next month or so, there is a bug that causes problems with doing distributed linear algebra, so I'm having to install pbdBASE from the developers' Github repository.
+
+One runs pbdR code via mpirun as follows:
+
+```{r, pbd-mpirun, eval=FALSE, engine='bash'}
+mpirun Rscript file.R > file.out
+```
+
+
+# 5.4.2) Distributed linear algebra
+
+Here's how you would set up a distributed matrix and do linear
+algebra on it. Note that when working with large matrices, you would
+generally want to construct the matrices (or read from disk) in a
+parallel fashion rather than creating the full matrix on one worker.
+
+```{r, pbd-linalg, eval=FALSE}
+```
+
+As a quick, completely non-definitive point of comparison, doing the
+crossproduct and Cholesky for the 16000x16000 matrix with 
+80 cores using pbdR took 39 seconds (crossproduct) and 14 seconds (Cholesky)
+while doing with 8 threads using openBLAS on a separate server (different hardware)
+took 70 seconds (crossproduct) and 40 seconds (Cholesky). So my sense is that you
+can get speedups but the scaling is far from optimal.
+
+
+# 5.4.3) Parallel apply
+
+Here's some basic syntax for doing a distributed apply on
+a matrix that is on one of the workers (i.e., the matrix is not distributed).
+
+```{r, pbd-apply, eval=FALSE}
+```
+
+# 5.4.4) Interfacing with MPI
+
+Here's an example of distributing an embarrassingly parallel calculation
+(estimating an integral via Monte Carlo - in this case estimating
+the value of $pi$), using MPI functionality.
+
+```{r, pbd-mpi, eval=FALSE}
+```
+
+# 6) Parallel R on the Biostat cluster
+
+The same R syntax should work on the Biostat cluster, except that you need to use the SGE submission syntax (*qsub*, *qrsh*). And when specifying how many cores your job has access to, you will probably need to use different environment variables, most likely the *$NSLOTS* variable.
+
+Also if you run code via mpirun (up to 72 cores), you might need to add some flags after `mpirun`; check with Burke for details.
+
+# 6) Storing and transferring large datasets
+
+There are a variety of storage resources available through Berkeley. This does not include AWS and other resources that would cost additional money; there are lots of cloud resources  for storing large amounts of data not discussed here.
+
+## 6.1) Savio storage
+
+Savio provides a modest amount of backed-up storage in your home directory (10 Gb per user) and for condo groups (200 Gb per group) and a lot of storage on in the scratch directory that is not backed up but which can be accessed very quickly from the compute nodes. There is no quota on space in scratch but also no guarantee that it won't be erased in the future (files that have been touched less recently will be deleted first, I believe). However, if you can get the data again, either by downloading it from elsewhere or regenerating it with your code, scratch is a good place to keep large amounts of data while you're working with it.
+
+A new service that Savio will provide in the near future is called *condo storage*. groups will be able to purchase dedicated storage on the order of terabytes at a good price that will be accessible from Savio.
+
+You can use SCF, SFTP, rsync, etc. to transfer from your laptop to the Savio data transfer node: dtn.brc.berkeley.edu.
+
+You can use Globus Connect to transfer data data to/from Savio (and between other resources) quickly and unattended. This is a better choice for large transfers.
+
+## 6.2) Globus Connect 
+
+For larger transfers and for making unattended transfers that will continue in the background, Globus Connect is a good option. Here are some [instructions](http://research-it.berkeley.edu/services/high-performance-computing/using-globus-connect-savio).
+
+Globus transfers data between *endpoints*. Possible endpoints include: Savio, your laptop or desktop, NERSC, the SCF, and XSEDE, among others.
+
+If you are transferring to/from your laptop, you'll need Globus Connect Personal set up and running on your machine and you'll need to establish your machine as an endpoint.
+
+If you're transferring to/from two existing endpoints (Savio, NERSC, SCF, XSEDE, etc.), then you can just do this via a browser. If there's demand, I suspect Burke would set up the Biostat network as an endpoint.
+
+Globus also provides a [command line interface](https://docs.globus.org/cli/using-the-cli) that will allow you to do transfers programmatically, such that a transfer could be embedded in a workflow script.
+
+## 6.3) Box
+
+Box provides **unlimited**, free, secured, and encrypted content storage of files with a maximum file size of 15 Gb to Berkeley affiliates. So it's a good option for backup and long-term storage. 
+
+You can move files between Box and your laptop using the Box Sync app. 
+
+The best way to move files between Box and Savio is [via lftp as discussed here](http://research-it.berkeley.edu/services/high-performance-computing/transferring-data-between-savio-and-your-uc-berkeley-box-account). 
+
+Here's how you logon to box via ltp on Savio (assuming you've set up an external password already as described in the link above):
+
+```{r, engine='bash', eval=FALSE}
+ssh my_savio_user_name@dtn.brc.berkeley.edu
+lftp ftp.box.com
+set ssl-allow true
+user username@berkeley.edu
+```
+
+```{r, engine='bash', eval=FALSE}
+lpwd # on Savio
+ls # on box
+!ls # on Savio
+mkdir workshops
+cd workshops # on box
+lcd savio-biostat-2016 # on savio
+put doMPI.R # savio to box
+get AirlineDataAll.ffData  # box to savio; 1.4 Gb in ~ 1 minute
+```
+
+One additional command that can be quite useful is *mirror*, which lets you copy an entire directory to/from Box.
+
+```
+# to upload a directory from Savio to Box 
+mirror -R mydir
+# to download a directory from Box to Savio
+mirror mydir .
+```
+
+Be careful, because it's fairly easy to wipe out files or directories on Box.
+
+Finally you can set up *special purpose accounts* (Berkeley SPA) so files are owned at a project level rather than by individuals.
+
+BRC is working on making Globus available for transfer to/from Box, but it's not available yet.
+
+## 6.4) Transfer to/from bDrive (Google Drive)
+
+bDrive provides **unlimited**, free, secured, and encrypted content storage of files with a maximum file size of 5 Tb to Berkeley affiliates.
+
+You can move files to and from your laptop using the Google Drive app. 
+
+There are also some third-party tools for copying files to/from Google Drive, though I've found them to be a bit klunky. This is why I'd recommend using Box for workflows at this point. However, BRC is also working on making Globus available for transfer to/from bDrive, though it's not available yet.
+
+
