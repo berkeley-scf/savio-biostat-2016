@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-<title>Workshop on Savio, Parallel R, and Data Storage, March 2016</title>
+<title>Workshop on Savio, Parallel R, and Data Storage</title>
 
 <script type="text/javascript">
 window.onload = function() {
@@ -204,16 +204,18 @@ hr {
 </head>
 
 <body>
-<h1>Workshop on Savio, Parallel R, and Data Storage, March 2016</h1>
+<h1>Workshop on Savio, Parallel R, and Data Storage</h1>
+
+<h1>March 2016</h1>
 
 <p>Chris Paciorek, Department of Statistics and 
 Berkeley Research Computing, UC Berkeley</p>
 
 <h1>0) This workshop</h1>
 
-<p>This workshop covers how to use Savio, basic strategies for using parallel processing in R, primarily on Savio, and campus resources for storing and transferring data.</p>
+<p>This workshop covers how to use Savio, basic strategies for using parallel processing in R (primarily on Savio), and campus resources for storing and transferring data.</p>
 
-<p>Savio is the (fairly) new campus high-performance computing cluster, run by <a href="http://research-it.berkeley.edu/programs/berkeley-research-computing">Berkeley Research Computing</a>.</p>
+<p>Savio is the (fairly) new campus Linux high-performance computing cluster, run by <a href="http://research-it.berkeley.edu/programs/berkeley-research-computing">Berkeley Research Computing</a>.</p>
 
 <p>This tutorial assumes you have a working knowledge of R and the basics of the UNIX/Linux command line.</p>
 
@@ -253,14 +255,14 @@ between different machines. </p>
 
 <ul>
 <li>threaded linear algebra (OpenBLAS, MKL, ACML) called from R</li>
-<li>multi-core computations using multiple processes via foreach or parallel apply/sapply/lapply</li>
+<li>multi-core computations using multiple R processes via foreach or parallel apply/sapply/lapply</li>
 </ul>
 
 <h3>Threaded linear algebra</h3>
 
 <p>Threads are multiple paths of execution within a single process. Using
 <em>top</em> to monitor a job that is executing threaded code, you&#39;ll
-see the process using more than 100\% of CPU. When this occurs, the
+see the process using more than 100% of CPU. When this occurs, the
 process is using multiple cores, although it appears as a single process
 rather than as multiple processes. In general, threaded code will
 detect the number of cores available on a machine and make use of
@@ -299,13 +301,14 @@ multiple nodes without needing to know how to to use MPI.</p>
 <ul>
 <li>new cluster: 8 nodes x 24 cores/node; 64 Gb RAM per node; SGE queueing</li>
 </ul></li>
-<li><p>Savio (SLURM queueing)</p>
+<li><p>Savio </p>
 
 <ul>
 <li>Department-owned nodes
 
 <ul>
 <li>Biostat (Mark/Alan) nodes: 8 nodes, 20 cores each</li>
+<li>ability to burst to up to 24 nodes in low-priority queue (also big memory and GPU nodes as well)</li>
 </ul></li>
 <li>Faculty Compute Allowance
 
@@ -314,7 +317,7 @@ multiple nodes without needing to know how to to use MPI.</p>
 <li>512 Gb RAM nodes available</li>
 <li>nodes with 2 GPUs each available</li>
 </ul></li>
-<li>Spark (not sure about SparkR) available on department nodes or FCA<br/></li>
+<li>Spark (not sure about SparkR) available on department nodes via FCA<br/></li>
 </ul></li>
 <li><p>Amazon EC2 and other cloud providers </p>
 
@@ -336,14 +339,14 @@ parallel computation.</p>
 
 <p>I&#39;m happy to help discuss specific circumstances, so just email <a href="mailto:consult@stat.berkeley.edu">consult@stat.berkeley.edu</a>.
 The new Berkeley Research Computing (BRC) initiative is also providing
-consulting on efficient parallelization strategies. If my expertise
+consulting on scaling your computations and determining the appropriate resources for a given computation, so if my expertise
 is not sufficient, I can help you get assistance from BRC.</p>
 
 <h1>4) Overview of using Savio</h1>
 
 <h1>4.1) Savio vs. the Biostat cluster</h1>
 
-<p>Note that while we&#39;ll focus on Savio, the setup of the Biostat cluster is similar and the R code shown here should work on the Biostat cluster as well. Note that on the Biostat much of the basic steps below won&#39;t be necessary. You&#39;ll often just need to submit the job [comment on submitting jobs to biostat].</p>
+<p>Note that while we&#39;ll focus on Savio, the setup of the Biostat cluster is similar and the R code shown here should work on the Biostat cluster as well. Job submission syntax will differ because Biostat uses the SGE queueing software (<em>qsub</em>, <em>qrsh</em>, etc.) while Savio uses SLURM (<em>sbatch</em>, <em>srun</em>, etc.).</p>
 
 <h1>4.2) Basic steps for using Savio</h1>
 
@@ -366,7 +369,7 @@ is not sufficient, I can help you get assistance from BRC.</p>
 
 <p>You might see <code>co_biostat</code> or <code>fc_YOUR-ADVISOR</code>. </p>
 
-<p>Here I&#39;ll use an account I have access to <code>ac_scsguest</code>, but when you do this, use an account you have access to.</p>
+<p>Here I&#39;ll use an account I have access (<em>ac_scsguest</em>), but when you  are on Savio use an account you have access to where you see <code>ac_scsguest</code> below.</p>
 
 <h1>4.3) Submitting jobs</h1>
 
@@ -380,7 +383,7 @@ is not sufficient, I can help you get assistance from BRC.</p>
 <pre><code class="bash">sbatch -A ac_scsguest -p savio  -N 1 -t 30:0 job.sh
 </code></pre>
 
-<p>You can also put the various flags (-A, -p, etc.) in the job submission file. For example, see job-template.sh, reproduced here:</p>
+<p>You can also put the various flags (-A, -p, etc.) in the job submission file. For example, see <em>job-template.sh</em>, reproduced here:</p>
 
 <pre><code class="bash">#!/bin/bash
 #SBATCH --job-name=test
@@ -424,7 +427,15 @@ R CMD BATCH --no-save file.R file.Rout
 
 <p>Some useful ones (these are not always available, depending on what flags you use to start your job) are: <em>SLURM_CPUS_ON_NODE</em> and <em>SLURM_NTASKS</em>.</p>
 
-<h1>4.5) Installing R packages</h1>
+<h1>4.5) Software modules</h1>
+
+<p>A lot of software is available on Savio but needs to be loaded from the relevant software module before you can use it.</p>
+
+<pre><code class="bash">module list  # what&#39;s loaded?
+module avail  # what&#39;s available
+</code></pre>
+
+<h1>4.6) Installing R packages</h1>
 
 <p>This can be a bit tricky, because while Savio makes a lot of software available, most of it is not loaded by default.</p>
 
@@ -448,7 +459,7 @@ Rscript -e &quot;install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.
 
 <p>At the moment R is an older version (3.1.1) and unlike on the Biostat or Statistics clusters, R does not use a fast BLAS, which means your linear algebra may be an order of magnitude or more slower than it could be. If this is important to you, email Burke or <a href="mailto:consult@stat.berkeley.edu">consult@stat.berkeley.edu</a> for guidance on installing your own version of R that uses the fast MKL BLAS that is available on Savio.</p>
 
-<h2>4.6) Getting help with Savio</h2>
+<h2>4.7) Getting help with Savio</h2>
 
 <ul>
 <li>For technical issues and questions about using Savio: email <a href="mailto:brc-hpc-help@lists.berkeley.edu">brc-hpc-help@lists.berkeley.edu</a>.</li>

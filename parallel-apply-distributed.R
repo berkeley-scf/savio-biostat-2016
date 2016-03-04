@@ -4,6 +4,7 @@
 # sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
 #
 # job.sh:
+# module load r
 # R CMD BATCH --no-save parallel-apply-distributed.R parallel-apply-distributed.Rout
 
 library(parallel)

@@ -4,6 +4,7 @@
 # sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
 #
 # job.sh:
+# module load r
 # R CMD BATCH --no-save foreach-doSNOW.R foreach-doSNOW.Rout
 
 install.packages(c('doSNOW'), repos = 'http://cran.cnr.berkeley.edu')

@@ -5,6 +5,7 @@
 # sbatch -A ac_scsguest -p savio  -N 1 -t 30:0 job.sh
 #
 # job.sh:
+# module load r
 # R CMD BATCH --no-save parallel-apply-multicore.R parallel-apply-multicore.Rout
 
 
@@ -15,7 +16,7 @@ taskFun <- function(){
 	return(mn)
 }
 
-nCores <- Sys.getenv('SLURM_CPUS_ON_NODE')
+nCores <- as.numeric(Sys.getenv('SLURM_CPUS_ON_NODE'))
 cl <- makeCluster(nCores) 
 
 nTasks <- 60

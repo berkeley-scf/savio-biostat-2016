@@ -1,4 +1,6 @@
-Workshop on Savio, Parallel R, and Data Storage, March 2016
+Workshop on Savio, Parallel R, and Data Storage
+=====================================================
+March 2016
 ==============================================================
 
 Chris Paciorek, Department of Statistics and 
@@ -19,9 +21,9 @@ read_chunk('pbd-linalg.R')
 
 # 0) This workshop
 
-This workshop covers how to use Savio, basic strategies for using parallel processing in R, primarily on Savio, and campus resources for storing and transferring data.
+This workshop covers how to use Savio, basic strategies for using parallel processing in R (primarily on Savio), and campus resources for storing and transferring data.
 
-Savio is the (fairly) new campus high-performance computing cluster, run by [Berkeley Research Computing](http://research-it.berkeley.edu/programs/berkeley-research-computing).
+Savio is the (fairly) new campus Linux high-performance computing cluster, run by [Berkeley Research Computing](http://research-it.berkeley.edu/programs/berkeley-research-computing).
 
 This tutorial assumes you have a working knowledge of R and the basics of the UNIX/Linux command line.
 
@@ -58,14 +60,14 @@ between different machines.
 
 The shared memory parallelism approaches that we'll cover are:
  - threaded linear algebra (OpenBLAS, MKL, ACML) called from R
- - multi-core computations using multiple processes via foreach or parallel apply/sapply/lapply
+ - multi-core computations using multiple R processes via foreach or parallel apply/sapply/lapply
  
 
 ### Threaded linear algebra
 
 Threads are multiple paths of execution within a single process. Using
 *top* to monitor a job that is executing threaded code, you'll
-see the process using more than 100\% of CPU. When this occurs, the
+see the process using more than 100% of CPU. When this occurs, the
 process is using multiple cores, although it appears as a single process
 rather than as multiple processes. In general, threaded code will
 detect the number of cores available on a machine and make use of
@@ -96,14 +98,15 @@ Other distributed memory capabilities available for R that we won't cover includ
  - Biostatistics 
    - new cluster: 8 nodes x 24 cores/node; 64 Gb RAM per node; SGE queueing
 
- - Savio (SLURM queueing)
+ - Savio 
    - Department-owned nodes
      - Biostat (Mark/Alan) nodes: 8 nodes, 20 cores each
+     - ability to burst to up to 24 nodes in low-priority queue (also big memory and GPU nodes as well)
    - Faculty Compute Allowance
      - ~200,000 core-hours per year free per faculty member; can be delegated to grads/postdocs
      - 512 Gb RAM nodes available
      - nodes with 2 GPUs each available
-   - Spark (not sure about SparkR) available on department nodes or FCA    
+   - Spark (not sure about SparkR) available on department nodes via FCA    
 
  - Amazon EC2 and other cloud providers 
    - ability to start virtual machines and virtual clusters
@@ -121,14 +124,14 @@ parallel computation.
 
 I'm happy to help discuss specific circumstances, so just email consult@stat.berkeley.edu.
 The new Berkeley Research Computing (BRC) initiative is also providing
-consulting on efficient parallelization strategies. If my expertise
+consulting on scaling your computations and determining the appropriate resources for a given computation, so if my expertise
 is not sufficient, I can help you get assistance from BRC.
 
 # 4) Overview of using Savio
 
 # 4.1) Savio vs. the Biostat cluster
 
-Note that while we'll focus on Savio, the setup of the Biostat cluster is similar and the R code shown here should work on the Biostat cluster as well. Note that on the Biostat much of the basic steps below won't be necessary. You'll often just need to submit the job [comment on submitting jobs to biostat].
+Note that while we'll focus on Savio, the setup of the Biostat cluster is similar and the R code shown here should work on the Biostat cluster as well. Job submission syntax will differ because Biostat uses the SGE queueing software (*qsub*, *qrsh*, etc.) while Savio uses SLURM (*sbatch*, *srun*, etc.).
 
 # 4.2) Basic steps for using Savio
 
@@ -150,7 +153,7 @@ sacctmgr -p show associations user=YOUR_NAME
 
 You might see `co_biostat` or `fc_YOUR-ADVISOR`. 
 
-Here I'll use an account I have access to `ac_scsguest`, but when you do this, use an account you have access to.
+Here I'll use an account I have access (*ac_scsguest*), but when you  are on Savio use an account you have access to where you see `ac_scsguest` below.
 
 # 4.3) Submitting jobs
 
@@ -164,7 +167,7 @@ To submit a non-interactive job on one node:
 sbatch -A ac_scsguest -p savio  -N 1 -t 30:0 job.sh
 ```
 
-You can also put the various flags (-A, -p, etc.) in the job submission file. For example, see job-template.sh, reproduced here:
+You can also put the various flags (-A, -p, etc.) in the job submission file. For example, see *job-template.sh*, reproduced here:
 
 ```{r, job-template, engine='bash', eval=FALSE}
 #!/bin/bash
@@ -210,13 +213,23 @@ SLURM provides a variety of UNIX environment variables that you can use to imple
 
 Some useful ones (these are not always available, depending on what flags you use to start your job) are: *SLURM_CPUS_ON_NODE* and *SLURM_NTASKS*.
 
-# 4.5) Installing R packages
+# 4.5) Software modules
+
+A lot of software is available on Savio but needs to be loaded from the relevant software module before you can use it.
+
+```{r, modules, engine='bash', eval=FALSE}
+module list  # what's loaded?
+module avail  # what's available
+```
+
+
+# 4.6) Installing R packages
 
 This can be a bit tricky, because while Savio makes a lot of software available, most of it is not loaded by default.
 
 To see what R packages are already installed:
 
-```{r, modules, engine='bash', eval=FALSE}
+```{r, r-modules, engine='bash', eval=FALSE}
 module load r
 module avail
 # now pick the packages you need:
@@ -236,7 +249,9 @@ However, not infrequently, installation of an R package (or its dependencies) re
 
 At the moment R is an older version (3.1.1) and unlike on the Biostat or Statistics clusters, R does not use a fast BLAS, which means your linear algebra may be an order of magnitude or more slower than it could be. If this is important to you, email Burke or consult@stat.berkeley.edu for guidance on installing your own version of R that uses the fast MKL BLAS that is available on Savio.
 
-## 4.6) Getting help with Savio
+## 4.7) Getting help with Savio
+
+Berkeley Research Computing provides consulting for campus researchers and can help answer questions in a variety of areas.
 
  - For technical issues and questions about using Savio: email brc-hpc-help@lists.berkeley.edu.
  - For questions about computing resources in general, including cloud computing: email brc@berkeley.edu.
@@ -261,9 +276,10 @@ export OMP_NUM_THREADS=$SLURM_CPUS_ON_NODE
 # or use a fixed number: 
 # export OMP_NUM_THREADS=8
 R CMD BATCH --no-save file.R file.Rout
+# then presumably you'll use linear algebra functionality in file.R
 ```
 
-This should work on the Biostat cluster, on which R is linked to the fast threaded BLAS called openBLAS (I believe).  You'll probably need to use the SGE environment variable $NSLOTS in place of $SLURM_CPUS_ON_NODE (presuming you are using a single node and want all of the requested cores used for threading).
+This should work on the Biostat cluster, on which R is linked to the fast threaded BLAS called openBLAS (I believe).  You'll probably need to use the SGE environment variable *$NSLOTS* in place of *$SLURM_CPUS_ON_NODE* (presuming you are using a single node and want all of the requested cores used for threading).
 
 ## 5.2) foreach and parallel apply on one node
 
