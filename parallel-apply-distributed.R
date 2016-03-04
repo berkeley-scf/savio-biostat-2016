@@ -9,16 +9,17 @@
 
 library(parallel)
 
-machines=rep(strsplit(Sys.getenv("SLURM_NODELIST"), ",")[[1]],
+machines <- rep(strsplit(Sys.getenv("SLURM_NODELIST"), ",")[[1]],
              each = as.numeric(Sys.getenv("SLURM_CPUS_ON_NODE")) )
 
-cl = makeCluster(machines)
+cl <- makeCluster(machines)
+print(cl)
 
-nTasks <- 60
+nTasks <- 120
 input <- 1:nTasks
 
 taskFun <- function(i){
-        mn <- mean(rnorm(1000000))
+        mn <- mean(rnorm(10000000))
         return(mn)
 }
 

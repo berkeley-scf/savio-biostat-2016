@@ -18,7 +18,7 @@ nTasks <- 60
 input <- 1:nTasks
 
 taskFun <- function(i){
-        mn <- mean(rnorm(1000000))
+        mn <- mean(rnorm(10000000))
         return(mn)
 }
 
