@@ -535,19 +535,14 @@ print(system.time(out &lt;- foreach(i = 1:nTasks) %dopar% {
 
 library(parallel)
 
-taskFun &lt;- function(){
-    mn &lt;- mean(rnorm(10000000))
-    return(mn)
-}
-
 nCores &lt;- as.numeric(Sys.getenv(&#39;SLURM_CPUS_ON_NODE&#39;))
 cl &lt;- makeCluster(nCores) 
 
 nTasks &lt;- 60
 input &lt;- 1:nTasks
 
-taskFun &lt;- function(){
-        mn &lt;- mean(rnorm(1000000))
+taskFun &lt;- function(i){
+        mn &lt;- mean(rnorm(10000000))
         return(mn)
 }
 
@@ -563,7 +558,7 @@ res &lt;- parSapply(cl, input, taskFun)
 
 <h3>5.3.1) distributed parallel apply</h3>
 
-<p>We can use parallel apply functionality from the <em>parallel</em> package across multiple nodes using <em>sockets</em>.</p>
+<p>We can use parallel apply functionality from the <em>parallel</em> package across multiple nodes; this uses <em>sockets</em>.</p>
 
 <pre><code class="r"># example invocation
 # sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
@@ -574,23 +569,26 @@ res &lt;- parSapply(cl, input, taskFun)
 
 library(parallel)
 
-machines=rep(strsplit(Sys.getenv(&quot;SLURM_NODELIST&quot;), &quot;,&quot;)[[1]],
+machines &lt;- rep(strsplit(Sys.getenv(&quot;SLURM_NODELIST&quot;), &quot;,&quot;)[[1]],
              each = as.numeric(Sys.getenv(&quot;SLURM_CPUS_ON_NODE&quot;)) )
 
-cl = makeCluster(machines)
+cl &lt;- makeCluster(machines)
+print(cl)
 
-nTasks &lt;- 60
+nTasks &lt;- 120
 input &lt;- 1:nTasks
 
-taskFun &lt;- function(){
-        mn &lt;- mean(rnorm(1000000))
+taskFun &lt;- function(i){
+        mn &lt;- mean(rnorm(10000000))
         return(mn)
 }
 
 # if the processes need objects (x and y, here) from the master&#39;s workspace:
 # clusterExport(cl, c(&#39;x&#39;, &#39;y&#39;))
 
-res &lt;- parSapply(cl, input, taskFun)
+print(system.time(
+    res &lt;- parSapply(cl, input, taskFun)
+    ))
 </code></pre>
 
 <h3>5.3.2) foreach + doSNOW</h3>
@@ -629,14 +627,14 @@ print(system.time(out &lt;- foreach(i = 1:nTasks) %dopar% {
 
 <h3>5.3.3) foreach + doMPI</h3>
 
-<p>I find this to be more of a hassle than doSNOW (with the socket cluster type), because (1) you have to start R via <em>mpirun</em>, (2) installing Rmpi can be a hassle, and (3) you can&#39;t really use it interactively. But if you want to do it, it&#39;s possible to use Rmpi as the backend for foreach and for parallel apply. </p>
+<p>I find this to be more of a hassle than doSNOW (with the socket cluster type), because (1) you have to start R via <em>mpirun</em>, (2) installing Rmpi when it&#39;s not already available can be a hassle, and (3) you can&#39;t really use it interactively. But if you want to do it, it&#39;s possible to use Rmpi as the backend for foreach and for parallel apply. </p>
 
 <pre><code class="r"># example invocation
 # sbatch -A ac_scsguest -p savio  -n 40 -t 30:0 job.sh
 #
 # job.sh:
 # module load r openmpi Rmpi
-# mpirun -np $SLURM_NTASKS R CMD BATCH --no-save foreach-doMPI.R foreach-doMPI.Rout
+# mpirun R CMD BATCH --no-save foreach-doMPI.R foreach-doMPI.Rout
 
 
 library(doMPI)
@@ -654,9 +652,7 @@ taskFun &lt;- function(){
 }
 
 print(system.time(out &lt;- foreach(i = 1:nTasks) %dopar% {
-    cat(&#39;Starting &#39;, i, &#39;th job.\n&#39;, sep = &#39;&#39;)
     outSub &lt;- taskFun()
-    cat(&#39;Finishing &#39;, i, &#39;th job.\n&#39;, sep = &#39;&#39;)
     outSub # this will become part of the out object
 }))
 
@@ -671,7 +667,7 @@ mpi.quit()
 <p>There is a relatively new effort to enhance R&#39;s capability for distributed
 memory processing called <em>pbdR</em>. pbdR is designed for
 SPMD processing in batch mode, which means that you start up multiple
-processes in a non-interactive fashion using mpirun. </p>
+processes in a non-interactive fashion using mpirun and the same code executes on all the nodes. </p>
 
 <p>pbdR provides the following capabilities:</p>
 
@@ -687,7 +683,7 @@ in other readily-accessible software.</p>
 
 <h1>5.4.1) Installation and running a pbdR job</h1>
 
-<p>The file <em>install_pbdR.sh</em> shows how to install pbdR (pbdR is a collection of inter-related packages). It&#39;s actually very easy to install from CRAN, except that just for the next month or so, there is a bug that causes problems with doing distributed linear algebra, so I&#39;m having to install pbdBASE from the developers&#39; Github repository.</p>
+<p>The file <em>install_pbdR.sh</em> shows how to install pbdR (pbdR is a collection of inter-related packages). It&#39;s actually very easy to install from CRAN, except that (just for the next month or so) there is a bug that causes problems with doing distributed linear algebra, so I&#39;m having to install pbdBASE from the developers&#39; Github repository.</p>
 
 <p>One runs pbdR code via mpirun as follows:</p>
 
@@ -818,13 +814,13 @@ finalize ()
 
 <h1>6) Storing and transferring large datasets</h1>
 
-<p>There are a variety of storage resources available through Berkeley. This does not include AWS and other resources that would cost additional money; there are lots of cloud resources  for storing large amounts of data not discussed here.</p>
+<p>There are a variety of storage resources available through Berkeley. There are lots of other cloud resources  for storing large amounts of data, such as through AWS, that are not discussed here, in part because you&#39;d have to pay for them.</p>
 
 <h2>6.1) Savio storage</h2>
 
 <p>Savio provides a modest amount of backed-up storage in your home directory (10 Gb per user) and for condo groups (200 Gb per group) and a lot of storage on in the scratch directory that is not backed up but which can be accessed very quickly from the compute nodes. There is no quota on space in scratch but also no guarantee that it won&#39;t be erased in the future (files that have been touched less recently will be deleted first, I believe). However, if you can get the data again, either by downloading it from elsewhere or regenerating it with your code, scratch is a good place to keep large amounts of data while you&#39;re working with it.</p>
 
-<p>A new service that Savio will provide in the near future is called <em>condo storage</em>. groups will be able to purchase dedicated storage on the order of terabytes at a good price that will be accessible from Savio.</p>
+<p>A new service that Savio will provide in the near future is called <em>condo storage</em>. Groups will be able to purchase dedicated storage on the order of terabytes at a good price that will be accessible from Savio.</p>
 
 <p>You can use SCF, SFTP, rsync, etc. to transfer from your laptop to the Savio data transfer node: dtn.brc.berkeley.edu.</p>
 
@@ -846,11 +842,11 @@ finalize ()
 
 <p>Box provides <strong>unlimited</strong>, free, secured, and encrypted content storage of files with a maximum file size of 15 Gb to Berkeley affiliates. So it&#39;s a good option for backup and long-term storage. </p>
 
-<p>You can move files between Box and your laptop using the Box Sync app. And you can interact with Box via a web browser at [box.berkeley.edu].</p>
+<p>You can move files between Box and your laptop using the Box Sync app. And you can interact with Box via a web browser at <a href="http://box.berkeley.edu">http://box.berkeley.edu</a>.</p>
 
 <p>The best way to move files between Box and Savio is <a href="http://research-it.berkeley.edu/services/high-performance-computing/transferring-data-between-savio-and-your-uc-berkeley-box-account">via lftp as discussed here</a>. </p>
 
-<p>Here&#39;s how you logon to box via ltp on Savio (assuming you&#39;ve set up an external password already as described in the link above):</p>
+<p>Here&#39;s how you logon to box via <em>lftp</em> on Savio (assuming you&#39;ve set up an external password already as described in the link above):</p>
 
 <pre><code class="bash">ssh my_savio_user_name@dtn.brc.berkeley.edu
 lftp ftp.box.com
@@ -864,7 +860,7 @@ ls # on box
 mkdir workshops
 cd workshops # on box
 lcd savio-biostat-2016 # on savio
-put doMPI.R # savio to box
+put foreach-doMPI.R # savio to box
 get AirlineDataAll.ffData  # box to savio; 1.4 Gb in ~ 1 minute
 </code></pre>
 

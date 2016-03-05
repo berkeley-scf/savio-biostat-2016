@@ -5,7 +5,7 @@
 #
 # job.sh:
 # module load r openmpi Rmpi
-# mpirun -np $SLURM_NTASKS R CMD BATCH --no-save foreach-doMPI.R foreach-doMPI.Rout
+# mpirun R CMD BATCH --no-save foreach-doMPI.R foreach-doMPI.Rout
 
 
 library(doMPI)
@@ -23,9 +23,7 @@ taskFun <- function(){
 }
 
 print(system.time(out <- foreach(i = 1:nTasks) %dopar% {
-	cat('Starting ', i, 'th job.\n', sep = '')
 	outSub <- taskFun()
-	cat('Finishing ', i, 'th job.\n', sep = '')
 	outSub # this will become part of the out object
 }))
 

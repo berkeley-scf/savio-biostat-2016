@@ -26,4 +26,6 @@ taskFun <- function(i){
 # if the processes need objects (x and y, here) from the master's workspace:
 # clusterExport(cl, c('x', 'y'))
 
-res <- parSapply(cl, input, taskFun)
+print(system.time(
+    res <- parSapply(cl, input, taskFun)
+    ))

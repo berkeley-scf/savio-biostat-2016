@@ -299,7 +299,7 @@ When trying to run parallel R code across multiple nodes, there needs to be some
 
 ### 5.3.1) distributed parallel apply
 
-We can use parallel apply functionality from the *parallel* package across multiple nodes using *sockets*.
+We can use parallel apply functionality from the *parallel* package across multiple nodes; this uses *sockets*.
 
 ```{r, parallel-apply-distributed, eval=FALSE}
 ```
@@ -313,7 +313,7 @@ SNOW is a nice package that parallelizes computations across a network of machin
 
 ### 5.3.3) foreach + doMPI
 
-I find this to be more of a hassle than doSNOW (with the socket cluster type), because (1) you have to start R via *mpirun*, (2) installing Rmpi can be a hassle, and (3) you can't really use it interactively. But if you want to do it, it's possible to use Rmpi as the backend for foreach and for parallel apply. 
+I find this to be more of a hassle than doSNOW (with the socket cluster type), because (1) you have to start R via *mpirun*, (2) installing Rmpi when it's not already available can be a hassle, and (3) you can't really use it interactively. But if you want to do it, it's possible to use Rmpi as the backend for foreach and for parallel apply. 
 
 ```{r, foreach-doMPI, eval=FALSE}
 ```
@@ -323,7 +323,7 @@ I find this to be more of a hassle than doSNOW (with the socket cluster type), b
 There is a relatively new effort to enhance R's capability for distributed
 memory processing called *pbdR*. pbdR is designed for
 SPMD processing in batch mode, which means that you start up multiple
-processes in a non-interactive fashion using mpirun. 
+processes in a non-interactive fashion using mpirun and the same code executes on all the nodes. 
 
 pbdR provides the following capabilities:
  - the ability to do distributed linear algebra by interfacing to *ScaLapack*,
@@ -336,7 +336,7 @@ in other readily-accessible software.
 
 # 5.4.1) Installation and running a pbdR job
 
-The file *install_pbdR.sh* shows how to install pbdR (pbdR is a collection of inter-related packages). It's actually very easy to install from CRAN, except that just for the next month or so, there is a bug that causes problems with doing distributed linear algebra, so I'm having to install pbdBASE from the developers' Github repository.
+The file *install_pbdR.sh* shows how to install pbdR (pbdR is a collection of inter-related packages). It's actually very easy to install from CRAN, except that (just for the next month or so) there is a bug that causes problems with doing distributed linear algebra, so I'm having to install pbdBASE from the developers' Github repository.
 
 One runs pbdR code via mpirun as follows:
 
@@ -383,13 +383,13 @@ the value of $pi$), using MPI functionality.
 
 # 6) Storing and transferring large datasets
 
-There are a variety of storage resources available through Berkeley. This does not include AWS and other resources that would cost additional money; there are lots of cloud resources  for storing large amounts of data not discussed here.
+There are a variety of storage resources available through Berkeley. There are lots of other cloud resources  for storing large amounts of data, such as through AWS, that are not discussed here, in part because you'd have to pay for them.
 
 ## 6.1) Savio storage
 
 Savio provides a modest amount of backed-up storage in your home directory (10 Gb per user) and for condo groups (200 Gb per group) and a lot of storage on in the scratch directory that is not backed up but which can be accessed very quickly from the compute nodes. There is no quota on space in scratch but also no guarantee that it won't be erased in the future (files that have been touched less recently will be deleted first, I believe). However, if you can get the data again, either by downloading it from elsewhere or regenerating it with your code, scratch is a good place to keep large amounts of data while you're working with it.
 
-A new service that Savio will provide in the near future is called *condo storage*. groups will be able to purchase dedicated storage on the order of terabytes at a good price that will be accessible from Savio.
+A new service that Savio will provide in the near future is called *condo storage*. Groups will be able to purchase dedicated storage on the order of terabytes at a good price that will be accessible from Savio.
 
 You can use SCF, SFTP, rsync, etc. to transfer from your laptop to the Savio data transfer node: dtn.brc.berkeley.edu.
 
@@ -411,11 +411,11 @@ Globus also provides a [command line interface](https://docs.globus.org/cli/usin
 
 Box provides **unlimited**, free, secured, and encrypted content storage of files with a maximum file size of 15 Gb to Berkeley affiliates. So it's a good option for backup and long-term storage. 
 
-You can move files between Box and your laptop using the Box Sync app. And you can interact with Box via a web browser at [box.berkeley.edu].
+You can move files between Box and your laptop using the Box Sync app. And you can interact with Box via a web browser at http://box.berkeley.edu.
 
 The best way to move files between Box and Savio is [via lftp as discussed here](http://research-it.berkeley.edu/services/high-performance-computing/transferring-data-between-savio-and-your-uc-berkeley-box-account). 
 
-Here's how you logon to box via ltp on Savio (assuming you've set up an external password already as described in the link above):
+Here's how you logon to box via *lftp* on Savio (assuming you've set up an external password already as described in the link above):
 
 ```{r, engine='bash', eval=FALSE}
 ssh my_savio_user_name@dtn.brc.berkeley.edu
@@ -431,7 +431,7 @@ ls # on box
 mkdir workshops
 cd workshops # on box
 lcd savio-biostat-2016 # on savio
-put doMPI.R # savio to box
+put foreach-doMPI.R # savio to box
 get AirlineDataAll.ffData  # box to savio; 1.4 Gb in ~ 1 minute
 ```
 
