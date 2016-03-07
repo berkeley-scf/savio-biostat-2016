@@ -449,10 +449,10 @@ module load plyr
 
 <p>To install a package</p>
 
-<p>We&#39;ll use <em>doSNOW</em> later, so let&#39;s see how that installation goes. Note that packages will be installed by default in your home directory in R/x86_64-unknown-linux-gnu-library/3.1. For many packages (those that compile C/C++/Fortran code) it&#39;s important to unload the <em>intel</em> module as this conflicts with default R package installation.</p>
+<p>We&#39;ll use <em>doSNOW</em> later, so let&#39;s see how that installation goes. Note that packages will be installed by default in your home directory in R/x86_64-unknown-linux-gnu-library/3.1 (sometimes however it&#39;s necessary to specify this explicitly as seen below). For many packages (those that compile C/C++/Fortran code) it&#39;s important to unload the <em>intel</em> module as this conflicts with default R package installation.</p>
 
 <pre><code class="bash">module unload intel # not necessary for doSNOW specifically
-Rscript -e &quot;install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.cnr.berkeley.edu&#39;)&quot;
+Rscript -e &quot;install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.cnr.berkeley.edu&#39;, lib = &#39;~/R/x86_64-unknown-linux-gnu-library/3.1&#39;)&quot;
 </code></pre>
 
 <p>However, not infrequently, installation of an R package (or its dependencies) requires a system package to be installed. Some of these might be available via <code>module load</code>, while others will not. For more guidance, contact <a href="mailto:brc-hpc-help@lists.berkeley.edu">brc-hpc-help@lists.berkeley.edu</a> or feel free to contact me (<a href="mailto:consult@stat.berkeley.edu">consult@stat.berkeley.edu</a>) directly.</p>
@@ -815,6 +815,8 @@ finalize ()
 <h1>6) Storing and transferring large datasets</h1>
 
 <p>There are a variety of storage resources available through Berkeley. There are lots of other cloud resources  for storing large amounts of data, such as through AWS, that are not discussed here, in part because you&#39;d have to pay for them.</p>
+
+<p>If you&#39;re transferring a lot of data and speed is an issue, see <a href="fasterdata.es.net">this website</a> for tips.</p>
 
 <h2>6.1) Savio storage</h2>
 
