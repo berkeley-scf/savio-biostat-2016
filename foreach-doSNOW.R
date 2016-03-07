@@ -7,7 +7,8 @@
 # module load r
 # R CMD BATCH --no-save foreach-doSNOW.R foreach-doSNOW.Rout
 
-install.packages(c('doSNOW'), repos = 'http://cran.cnr.berkeley.edu')
+# if needed:
+# install.packages(c('doSNOW'), repos = 'http://cran.cnr.berkeley.edu')
 
 library(doSNOW)
 machines=rep(strsplit(Sys.getenv("SLURM_NODELIST"), ",")[[1]],
