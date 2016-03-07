@@ -9,7 +9,7 @@
 
 library(pbdDMAT, quiet = TRUE )
 
-n <- 4096*4  # 16k by 16k matrix
+n <- 4096*2  # did a test with a 16k by 16k matrix, but for quicker demo do 8k by 8k
 
 init.grid()
 
