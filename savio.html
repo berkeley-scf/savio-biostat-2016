@@ -387,7 +387,7 @@ is not sufficient, I can help you get assistance from BRC.</p>
 
 <pre><code class="bash">#!/bin/bash
 #SBATCH --job-name=test
-#SBATCH -a ac_scsguest
+#SBATCH -A ac_scsguest
 #SBATCH -p savio
 ## or -p savio2 for co_biostat nodes
 #SBATCH -N 1
@@ -449,7 +449,7 @@ module load plyr
 
 <p>To install a package</p>
 
-<p>We&#39;ll use <em>doSNOW</em> later, so let&#39;s see how that installation goes. Note that packages will be installed by default in your home directory in R/x86_64-unknown-linux-gnu-library/3.1 (sometimes however it&#39;s necessary to specify this explicitly as seen below). For many packages (those that compile C/C++/Fortran code) it&#39;s important to unload the <em>intel</em> module as this conflicts with default R package installation.</p>
+<p>We&#39;ll use <em>doSNOW</em> later, so let&#39;s see how that installation goes. Note that packages will be installed by default in your home directory in R/x86_64-unknown-linux-gnu-library/3.1 (sometimes however it&#39;s necessary to specify this explicitly as seen below, or R may ask specifically if it should install the package in your home directory). For many packages (those that compile C/C++/Fortran code) it&#39;s important to unload the <em>intel</em> module as this conflicts with default R package installation.</p>
 
 <pre><code class="bash">module unload intel # not necessary for doSNOW specifically
 Rscript -e &quot;install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.cnr.berkeley.edu&#39;, lib = &#39;~/R/x86_64-unknown-linux-gnu-library/3.1&#39;)&quot;
@@ -602,7 +602,8 @@ print(system.time(
 # module load r
 # R CMD BATCH --no-save foreach-doSNOW.R foreach-doSNOW.Rout
 
-install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.cnr.berkeley.edu&#39;)
+# if needed:
+# install.packages(c(&#39;doSNOW&#39;), repos = &#39;http://cran.cnr.berkeley.edu&#39;)
 
 library(doSNOW)
 machines=rep(strsplit(Sys.getenv(&quot;SLURM_NODELIST&quot;), &quot;,&quot;)[[1]],
@@ -706,7 +707,7 @@ parallel fashion rather than creating the full matrix on one worker.</p>
 
 library(pbdDMAT, quiet = TRUE )
 
-n &lt;- 4096*4  # 16k by 16k matrix
+n &lt;- 4096*2  # did a test with a 16k by 16k matrix, but for quicker demo do 8k by 8k
 
 init.grid()
 
